@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { formulationsData } from "@/data/formulations";
 
 interface InvoiceModalProps {
@@ -48,18 +47,13 @@ const InvoiceModal = ({
 
   const [priceData, setPriceData] = useState(formulationsData);
 
-  // Load custom prices from database
+  // Load custom prices from localStorage
   useEffect(() => {
-    const loadPrices = async () => {
+    const loadPrices = () => {
       try {
-        const { data } = await supabase
-          .from("settings")
-          .select("setting_data")
-          .eq("setting_type", "pricing")
-          .single();
-
-        if (data?.setting_data) {
-          const customPrices = data.setting_data;
+        const saved = localStorage.getItem("pricing");
+        if (saved) {
+          const customPrices = JSON.parse(saved);
           const mergedPrices = formulationsData.map((formulation) => {
             const customPrice = customPrices[formulation.id];
             if (customPrice) {
@@ -167,16 +161,17 @@ const InvoiceModal = ({
     setFormData({ ...formData, items: newItems });
   };
 
-  const handleSave = async () => {
+  const generateInvoiceNumber = () => {
+    const timestamp = Date.now();
+    return `INV-${timestamp}`;
+  };
+
+  const handleSave = () => {
     const subtotal = formData.items.reduce((sum, item) => sum + item.amount, 0);
     const taxAmount = (subtotal * formData.taxRate) / 100;
     const total = subtotal + taxAmount;
 
-    let invoiceNumber = invoice?.invoice_number;
-    if (!invoice) {
-      const { data } = await supabase.rpc("generate_invoice_number");
-      invoiceNumber = data;
-    }
+    const invoiceNumber = invoice?.invoice_number || generateInvoiceNumber();
 
     const invoiceData = {
       invoice_number: invoiceNumber,
