@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,52 +6,13 @@ import { Search, Edit, Save, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formulationsData } from "@/data/formulations";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Prices = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [prices, setPrices] = useState(formulationsData);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
-  useEffect(() => {
-    loadPrices();
-  }, []);
-
-  const loadPrices = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("settings")
-        .select("setting_data")
-        .eq("setting_type", "pricing")
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        throw error;
-      }
-
-      if (data?.setting_data) {
-        const customPrices = data.setting_data;
-        const mergedPrices = formulationsData.map((formulation) => {
-          const customPrice = customPrices[formulation.id];
-          if (customPrice) {
-            return {
-              ...formulation,
-              costPer1L: customPrice.costPer1L ?? formulation.costPer1L,
-            };
-          }
-          return formulation;
-        });
-        setPrices(mergedPrices);
-      }
-    } catch (error) {
-      console.error("Error loading prices:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePriceChange = (
     formulationId: number,
@@ -66,62 +27,46 @@ const Prices = () => {
     );
   };
 
-  const savePrices = async () => {
-    try {
-      const pricingData = prices.reduce((acc, formulation) => {
-        acc[formulation.id] = {
-          costPer1L: formulation.costPer1L,
-        };
-        return acc;
-      }, {} as any);
+  const savePrices = () => {
+    // Save to localStorage for persistence
+    const pricingData = prices.reduce((acc, formulation) => {
+      acc[formulation.id] = {
+        costPer1L: formulation.costPer1L,
+      };
+      return acc;
+    }, {} as Record<number, { costPer1L: number }>);
 
-      const { data: existing } = await supabase
-        .from("settings")
-        .select("id")
-        .eq("setting_type", "pricing")
-        .single();
+    localStorage.setItem("pricing", JSON.stringify(pricingData));
 
-      if (existing) {
-        const { error } = await supabase
-          .from("settings")
-          .update({
-            setting_data: pricingData,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("setting_type", "pricing");
+    toast({
+      title: "Success",
+      description: "Prices saved successfully",
+      duration: 5000,
+    });
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("settings").insert({
-          setting_type: "pricing",
-          setting_data: pricingData,
-          user_id: "00000000-0000-0000-0000-000000000000",
-        });
-
-        if (error) throw error;
-      }
-
-      toast({
-        title: "Success",
-        description: "Prices saved successfully",
-        duration: 5000, // ✅ Auto-dismiss after 5 seconds
-      });
-
-      setEditMode(false);
-    } catch (error) {
-      console.error("Error saving prices:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save prices",
-        variant: "destructive",
-        duration: 5000, // ✅ Auto-dismiss after 5 seconds
-      });
-    }
+    setEditMode(false);
   };
 
   const cancelEdit = () => {
     setEditMode(false);
-    loadPrices();
+    // Reload from localStorage or default
+    const saved = localStorage.getItem("pricing");
+    if (saved) {
+      const customPrices = JSON.parse(saved);
+      const mergedPrices = formulationsData.map((formulation) => {
+        const customPrice = customPrices[formulation.id];
+        if (customPrice) {
+          return {
+            ...formulation,
+            costPer1L: customPrice.costPer1L ?? formulation.costPer1L,
+          };
+        }
+        return formulation;
+      });
+      setPrices(mergedPrices);
+    } else {
+      setPrices(formulationsData);
+    }
   };
 
   const filteredFormulations = prices.filter((formulation) =>
@@ -134,7 +79,6 @@ const Prices = () => {
 
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-4">
               Product Prices
@@ -188,7 +132,6 @@ const Prices = () => {
             </CardHeader>
 
             <CardContent>
-              {/* 4x3 Grid Layout — Product & Price on same row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {filteredFormulations.map((formulation) => (
                   <Card
