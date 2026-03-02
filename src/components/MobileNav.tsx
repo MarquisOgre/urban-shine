@@ -12,12 +12,12 @@ const MobileNav = () => {
 
   const publicItems = [
     { to: "/formulations", label: "Formulations", icon: Beaker },
+    { to: "/prices", label: "Prices", icon: DollarSign },
     { to: "/indent-sheet", label: "Indent Sheet", icon: ClipboardList },
   ];
 
   const protectedItems = [
     { to: "/invoice", label: "Invoice System", icon: FileText },
-    { to: "/prices", label: "Prices", icon: DollarSign },
   ];
 
   const menuItems = user ? [...protectedItems, ...publicItems] : publicItems;
