@@ -14,7 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chemical_prices: {
+        Row: {
+          chemical: string
+          created_at: string
+          id: number
+          rate: number
+          uom: string
+          updated_at: string
+        }
+        Insert: {
+          chemical: string
+          created_at?: string
+          id?: number
+          rate?: number
+          uom: string
+          updated_at?: string
+        }
+        Update: {
+          chemical?: string
+          created_at?: string
+          id?: number
+          rate?: number
+          uom?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          gst_no: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          customer_address: string | null
+          customer_email: string | null
+          customer_gst_no: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          items: Json
+          notes: string | null
+          status: string
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total_amount: number
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number: string
+          items?: Json
+          notes?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total_amount?: number
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          items?: Json
+          notes?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packing_materials: {
+        Row: {
+          created_at: string
+          id: number
+          minimum_order: number
+          product: string
+          retail_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          minimum_order?: number
+          product: string
+          retail_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          minimum_order?: number
+          product?: string
+          retail_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_prices: {
+        Row: {
+          bulk_price_100gms: number | null
+          bulk_price_5ltr: number | null
+          created_at: string
+          id: number
+          product: string
+          retail_price: number
+          uom: string | null
+          updated_at: string
+        }
+        Insert: {
+          bulk_price_100gms?: number | null
+          bulk_price_5ltr?: number | null
+          created_at?: string
+          id?: number
+          product: string
+          retail_price?: number
+          uom?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bulk_price_100gms?: number | null
+          bulk_price_5ltr?: number | null
+          created_at?: string
+          id?: number
+          product?: string
+          retail_price?: number
+          uom?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
