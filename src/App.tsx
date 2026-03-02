@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Formulations from "./pages/Formulations";
 import FormulationDetail from "./pages/FormulationDetail";
 import ProductPrices from "./pages/ProductPrices";
@@ -13,6 +15,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Prices from "./pages/Prices";
 import Invoice from "./pages/Invoice";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,21 +26,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Formulations />} />
-          <Route path="/invoice" element={<Invoice />} />
-          <Route path="/formulations" element={<Formulations />} />
-          <Route path="/formulation/:slug" element={<FormulationDetail />} />
-          <Route path="/product-prices" element={<ProductPrices />} />
-          <Route path="/packing-materials" element={<PackingMaterials />} />
-          <Route path="/chemical-prices" element={<ChemicalPrices />} />
-          <Route path="/indent-sheet" element={<IndentSheet />} />
-          <Route path="/prices" element={<Prices />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Formulations />} />
+            <Route path="/formulations" element={<Formulations />} />
+            <Route path="/formulation/:slug" element={<FormulationDetail />} />
+            <Route path="/indent-sheet" element={<IndentSheet />} />
+            <Route path="/login" element={<Login />} />
+
+            {/* Protected routes */}
+            <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
+            <Route path="/prices" element={<ProtectedRoute><Prices /></ProtectedRoute>} />
+            <Route path="/product-prices" element={<ProtectedRoute><ProductPrices /></ProtectedRoute>} />
+            <Route path="/packing-materials" element={<ProtectedRoute><PackingMaterials /></ProtectedRoute>} />
+            <Route path="/chemical-prices" element={<ProtectedRoute><ChemicalPrices /></ProtectedRoute>} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
