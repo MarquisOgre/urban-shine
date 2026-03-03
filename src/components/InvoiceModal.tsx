@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formulationsData } from "@/data/formulations";
+import { productPricesData } from "@/data/pricingData";
 
 interface InvoiceModalProps {
   open: boolean;
@@ -46,34 +46,7 @@ const InvoiceModal = ({
     notes: "",
   });
 
-  const [priceData, setPriceData] = useState(formulationsData);
-
-  // Load custom prices from localStorage
-  useEffect(() => {
-    const loadPrices = () => {
-      try {
-        const saved = localStorage.getItem("pricing");
-        if (saved) {
-          const customPrices = JSON.parse(saved);
-          const mergedPrices = formulationsData.map((formulation) => {
-            const customPrice = customPrices[formulation.id];
-            if (customPrice) {
-              return {
-                ...formulation,
-                costPer1L: customPrice.costPer1L ?? formulation.costPer1L,
-              };
-            }
-            return formulation;
-          });
-          setPriceData(mergedPrices);
-        }
-      } catch (error) {
-        console.error("Error loading prices:", error);
-      }
-    };
-
-    if (open) loadPrices();
-  }, [open]);
+  const priceData = productPricesData;
 
   // Populate form if editing existing invoice
   useEffect(() => {
@@ -309,13 +282,13 @@ const InvoiceModal = ({
                       <SelectValue placeholder={item.description || "Select product"} />
                     </SelectTrigger>
                     <SelectContent className="bg-white border shadow-lg max-h-[300px] z-[100]">
-                      {priceData.map((formulation) => (
+                      {priceData.map((product) => (
                         <SelectItem
-                          key={formulation.id}
-                          value={`${formulation.name}|1 Ltr|${formulation.costPer1L}`}
+                          key={product.id}
+                          value={`${product.product}|${product.uom || '1 Ltr'}|${product.retailPrice}`}
                         >
-                          {formulation.name} - 1 Ltr (₹
-                          {formulation.costPer1L.toFixed(2)})
+                          {product.product} - {product.uom || '1 Ltr'} (₹
+                          {product.retailPrice.toFixed(2)})
                         </SelectItem>
                       ))}
                     </SelectContent>

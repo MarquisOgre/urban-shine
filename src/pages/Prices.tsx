@@ -6,6 +6,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formulationsData } from "@/data/formulations";
 
+const calculateCostPer1L = (formulation: any) => {
+  const totalIngredientCost = formulation.ingredients.reduce(
+    (sum: number, ing: any) => sum + ing.amount, 0
+  );
+  const totalQty = formulation.TotalQuantity || formulation.baseYield;
+  if (totalQty <= 0) return 0;
+  return totalIngredientCost / totalQty;
+};
+
 const Prices = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -58,10 +67,7 @@ const Prices = () => {
                         {formulation.name}
                       </span>
                       <span className="text-base font-semibold text-blue-700">
-                        ₹
-                        {formulation.costPer1L > 0
-                          ? formulation.costPer1L.toFixed(2)
-                          : "-"}
+                        ₹{calculateCostPer1L(formulation).toFixed(2)}
                       </span>
                     </CardContent>
                   </Card>
