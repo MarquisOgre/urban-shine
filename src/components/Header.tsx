@@ -45,6 +45,12 @@ const Header = () => {
               Formulations
             </Link>
             <Link
+              to="/product-prices"
+              className="bg-white text-blue-600 font-semibold py-2 px-3 lg:px-4 rounded-lg shadow hover:bg-blue-100 transition-colors text-sm lg:text-base"
+            >
+              Product Prices
+            </Link>
+            <Link
               to="/prices"
               className="bg-white text-blue-600 font-semibold py-2 px-3 lg:px-4 rounded-lg shadow hover:bg-blue-100 transition-colors text-sm lg:text-base"
             >

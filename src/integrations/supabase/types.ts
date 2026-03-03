@@ -54,6 +54,7 @@ export type Database = {
           customer_id: string | null
           customer_name: string
           customer_phone: string | null
+          discount: number | null
           id: string
           invoice_date: string
           invoice_number: string
@@ -74,6 +75,7 @@ export type Database = {
           customer_id?: string | null
           customer_name: string
           customer_phone?: string | null
+          discount?: number | null
           id?: string
           invoice_date?: string
           invoice_number: string
@@ -94,6 +96,7 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string
           customer_phone?: string | null
+          discount?: number | null
           id?: string
           invoice_date?: string
           invoice_number?: string

@@ -42,6 +42,7 @@ const InvoiceModal = ({
     customer_gst_no: "",
     items: [{ description: "", quantity: 1, rate: 0, amount: 0 }],
     taxRate: 0,
+    discount: 0,
     notes: "",
   });
 
@@ -87,6 +88,7 @@ const InvoiceModal = ({
         items:
           invoice.items || [{ description: "", quantity: 1, rate: 0, amount: 0 }],
         taxRate: invoice.tax_rate || 0,
+        discount: invoice.discount || 0,
         notes: invoice.notes || "",
       });
     } else {
@@ -99,6 +101,7 @@ const InvoiceModal = ({
         customer_gst_no: "",
         items: [{ description: "", quantity: 1, rate: 0, amount: 0 }],
         taxRate: 0,
+        discount: 0,
         notes: "",
       });
     }
@@ -168,8 +171,10 @@ const InvoiceModal = ({
 
   const handleSave = () => {
     const subtotal = formData.items.reduce((sum, item) => sum + item.amount, 0);
-    const taxAmount = (subtotal * formData.taxRate) / 100;
-    const total = subtotal + taxAmount;
+    const discountAmount = (subtotal * formData.discount) / 100;
+    const afterDiscount = subtotal - discountAmount;
+    const taxAmount = (afterDiscount * formData.taxRate) / 100;
+    const total = afterDiscount + taxAmount;
 
     const invoiceNumber = invoice?.invoice_number || generateInvoiceNumber();
 
@@ -183,6 +188,7 @@ const InvoiceModal = ({
       customer_gst_no: formData.customer_gst_no || null,
       items: formData.items,
       subtotal,
+      discount: formData.discount,
       tax_rate: formData.taxRate,
       tax_amount: taxAmount,
       total_amount: total,
@@ -354,8 +360,20 @@ const InvoiceModal = ({
             </div>
           </div>
 
-          {/* Tax & Notes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Discount, Tax & Notes */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label>Discount (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.discount}
+                onChange={(e) =>
+                  setFormData({ ...formData, discount: Number(e.target.value) })
+                }
+              />
+            </div>
             <div>
               <Label>Tax Rate (%)</Label>
               <Select
@@ -376,7 +394,6 @@ const InvoiceModal = ({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <Label>Notes</Label>
               <Textarea
@@ -389,48 +406,37 @@ const InvoiceModal = ({
           </div>
 
           {/* Summary */}
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>
-                  ₹
-                  {formData.items
-                    .reduce((sum, item) => sum + item.amount, 0)
-                    .toFixed(2)}
-                </span>
+          {(() => {
+            const subtotal = formData.items.reduce((sum, item) => sum + item.amount, 0);
+            const discountAmt = (subtotal * formData.discount) / 100;
+            const afterDiscount = subtotal - discountAmt;
+            const taxAmt = (afterDiscount * formData.taxRate) / 100;
+            const total = afterDiscount + taxAmt;
+            return (
+              <div className="bg-slate-50 p-4 rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
+                  </div>
+                  {formData.discount > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Discount ({formData.discount}%):</span>
+                      <span>- ₹{discountAmt.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Tax ({formData.taxRate}%):</span>
+                    <span>₹{taxAmt.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Total:</span>
+                    <span>₹{total.toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>
-                  Tax ({formData.taxRate}%):
-                </span>
-                <span>
-                  ₹
-                  {(
-                    (formData.items.reduce(
-                      (sum, item) => sum + item.amount,
-                      0
-                    ) *
-                      formData.taxRate) /
-                    100
-                  ).toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between font-bold text-lg border-t pt-2">
-                <span>Total:</span>
-                <span>
-                  ₹
-                  {(
-                    formData.items.reduce(
-                      (sum, item) => sum + item.amount,
-                      0
-                    ) *
-                    (1 + formData.taxRate / 100)
-                  ).toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Buttons */}
           <div className="flex justify-end gap-2">
