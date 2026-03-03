@@ -87,6 +87,12 @@ const InvoicePrint = ({ invoice, onClose }: InvoicePrintProps) => {
               <span>Subtotal:</span>
               <span>₹{(invoice.subtotal || 0).toFixed(2)}</span>
             </div>
+            {(invoice.discount || 0) > 0 && (
+              <div className="flex justify-between py-2 text-red-600">
+                <span>Discount ({invoice.discount}%):</span>
+                <span>- ₹{((invoice.subtotal || 0) * (invoice.discount || 0) / 100).toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between py-2">
               <span>Tax ({invoice.tax_rate || 0}%):</span>
               <span>₹{(invoice.tax_amount || 0).toFixed(2)}</span>
