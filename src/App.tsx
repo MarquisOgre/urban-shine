@@ -13,7 +13,7 @@ import ChemicalPrices from "./pages/ChemicalPrices";
 import IndentSheet from "./pages/IndentSheet";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Prices from "./pages/Prices";
+
 import Invoice from "./pages/Invoice";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -37,7 +37,7 @@ const App = () => (
 
             {/* Protected routes */}
             <Route path="/invoice" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
-            <Route path="/prices" element={<Prices />} />
+            <Route path="/prices" element={<ProductPrices />} />
             <Route path="/product-prices" element={<ProductPrices />} />
             <Route path="/packing-materials" element={<PackingMaterials />} />
             <Route path="/chemical-prices" element={<ChemicalPrices />} />
