@@ -1,7 +1,7 @@
 import { FormulationData } from "./types";
 import { phenylFormulation } from "./formulations/phenyl";
 import { dishWashFormulation } from "./formulations/dishWashLiquid";
-import { brassCleaningFormulation} from "./formulations/brassCleaningLiquid";
+import { brassCleaningFormulation} from "./formulations/copperCleaningLiquid";
 import { floorCleaningFormulation } from "./formulations/floorCleaningLiquid";
 import { toiletCleanerFormulation } from "./formulations/toiletCleaner";
 import { acidFormulation } from "./formulations/acid";

@@ -44,7 +44,7 @@ const Footer = () => {
             <ul className="space-y-1 sm:space-y-2 text-slate-300 text-sm sm:text-base">
               <li><Link to="/formulation/phenyl" className="hover:text-white transition-colors">Phenyl</Link></li>
               <li><Link to="/formulation/dish-wash-liquid" className="hover:text-white transition-colors">Dish Wash Liquid</Link></li>
-              <li><Link to="/formulation/brass-cleaning-liquid" className="hover:text-white transition-colors">Brass Cleaning Liquid</Link></li>
+              <li><Link to="/formulation/copper-cleaning-liquid" className="hover:text-white transition-colors">Copper Cleaning Liquid</Link></li>
               <li><Link to="/formulation/toilet-cleaner" className="hover:text-white transition-colors">Toilet Cleaner</Link></li>
               <li><Link to="/formulation/acid" className="hover:text-white transition-colors">Acid</Link></li>
               <li><Link to="/formulation/hand-wash-liquid" className="hover:text-white transition-colors">Hand Wash Liquid</Link></li>

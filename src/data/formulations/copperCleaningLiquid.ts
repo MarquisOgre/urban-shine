@@ -3,10 +3,10 @@ import { FormulationData } from "../types";
 
 export const brassCleaningFormulation: FormulationData = {
   id: 3,
-  name: "Brass Cleaning Liquid",
-  slug: "brass-cleaning-liquid",
+  name: "Copper Cleaning Liquid",
+  slug: "copper-cleaning-liquid",
   category: "Metal Cleaners",
-  description: "Effective formulation for cleaning brass surfaces, removes tarnish and restores shine.",
+  description: "Effective formulation for cleaning copper surfaces, removes tarnish and restores shine.",
   baseYield: 10.00, // Total quantity from ingredients
   TotalQuantity: 10, // Set to override auto-calculated quantity (e.g., 11.5)
   ingredients: [
