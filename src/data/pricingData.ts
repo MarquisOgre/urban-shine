@@ -48,7 +48,7 @@ export const chemicalPrices: ChemicalData[] = [
     { id: 10, chemical: "Crystals", rate: 80, uom: "KG" },
     { id: 11, chemical: "Glycerin", rate: 200, uom: "LTR" },
     { id: 12, chemical: "Handwash Base - Pearl", rate: 200, uom: "KG" },
-    { id: 13, chemical: "Hydrochloric Acid", rate: 20, uom: "LTR" },
+    { id: 13, chemical: "Acid", rate: 20, uom: "LTR" },
     { id: 14, chemical: "Jasmine Perfume", rate: 1000, uom: "LTR" },
     { id: 15, chemical: "Perfume", rate: 1000, uom: "LTR" },
     { id: 16, chemical: "Phenyl Concentrate", rate: 180, uom: "LTR" },

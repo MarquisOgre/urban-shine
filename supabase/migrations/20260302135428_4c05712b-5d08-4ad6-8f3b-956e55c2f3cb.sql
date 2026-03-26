@@ -117,7 +117,7 @@ INSERT INTO public.chemical_prices (id, chemical, rate, uom) VALUES
 (10, 'Crystals', 80, 'KG'),
 (11, 'Glycerin', 200, 'LTR'),
 (12, 'Handwash Base - Pearl', 200, 'KG'),
-(13, 'Hydrochloric Acid', 20, 'LTR'),
+(13, 'Acid', 20, 'LTR'),
 (14, 'Jasmine Perfume', 1000, 'LTR'),
 (15, 'Perfume', 1000, 'LTR'),
 (16, 'Phenyl Concentrate', 180, 'LTR'),

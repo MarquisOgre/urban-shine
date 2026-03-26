@@ -10,7 +10,7 @@ export const acidFormulation: FormulationData = {
   baseYield: 10.00, // Total quantity from ingredients
   TotalQuantity: undefined, // Set to override auto-calculated quantity (e.g., 10.5)
   ingredients: [
-    { slNo: 1, particulars: "Hydrochloric Acid", uom: "LTR", qty: 10.0, rate: 20, amount: 10 * 20 }
+    { slNo: 1, particulars: "Acid", uom: "LTR", qty: 10.0, rate: 20, amount: 10 * 20 }
   ],
   costPer500ML: 0, // Auto-calculated
   costPer1L: 0, // Auto-calculated
@@ -19,7 +19,7 @@ export const acidFormulation: FormulationData = {
   costPer1LBottle: 6.00,
   costPer5LBottle: 35.00,
   methodOfPreparation: [
-    "Carefully add hydrochloric acid to a acid-resistant vessel",
+    "Carefully add Acid to a acid-resistant vessel",
     "Add color for identification",
     "Mix gently",
     "Store in acid-resistant containers"
