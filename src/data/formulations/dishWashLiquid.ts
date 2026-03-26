@@ -18,7 +18,7 @@ export const dishWashFormulation: FormulationData = {
     { slNo: 6, particulars: "Caustic Soda", uom: "KGS", qty: 0.075, rate: 80, amount: 0.075 * 80 },
     { slNo: 7, particulars: "RO Water", uom: "LTR", qty: 8.5, rate: 0.5, amount: 8.5 * 0.5 },
     { slNo: 8, particulars: "Salt", uom: "KGS", qty: 0.14, rate: 30, amount: 0.14 * 30 },
-    { slNo: 9, particulars: "Citric Acid", uom: "LTR", qty: 0.01, rate: 150, amount: 0.01 * 150 },
+    { slNo: 9, particulars: "Citric Acid", uom: "KGS", qty: 0.01, rate: 150, amount: 0.01 * 150 },
     { slNo: 10, particulars: "Sodium Benzoate", uom: "KGS", qty: 0.002, rate: 280, amount: 0.002 * 280 }
   ],
   costPer500ML: 0, // Auto-calculated
