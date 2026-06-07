@@ -1,18 +1,21 @@
 import { PricingData, PackingData } from "./types";
 
 export const productPricesData: PricingData[] = [
-    { id: 5, product: "Acid", uom: "1 Ltr", retailPrice: 50, bulkPrice5Ltr: 200 },
-    { id: 3, product: "Copper Cleaning", uom: "500 ML", retailPrice: 100, bulkPrice5Ltr: 900 },
-    { id: 7, product: "Detergent Powder", uom: "1 Kg", retailPrice: 150, bulkPrice5Ltr: 650 },
-    { id: 2, product: "Dish Wash", uom: "500 ML", retailPrice: 80, bulkPrice5Ltr: 700 },
-    { id: 9, product: "Floor Cleaning", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
-    { id: 6, product: "Hand Wash", uom: "500 ML", retailPrice: 100, bulkPrice5Ltr: 900 },
-    { id: 8, product: "Liquid Detergent", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
-    { id: 1, product: "Phenyl", uom: "1 Ltr", retailPrice: 60, bulkPrice5Ltr: 250 },
-    { id: 10, product: "Rose Water", uom: "1 Ltr", retailPrice: 60, bulkPrice5Ltr: 250 },
-    { id: 4, product: "Toilet Cleaner", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
-    { id: 12, product: "Vaseline", uom: "25 Gms", retailPrice: 25, bulkPrice100Gms: 90 },
-    { id: 11, product: "Zandu Balm", uom: "25 Gms", retailPrice: 80, bulkPrice100Gms: 300 },
+    { id: 1, product: "Acid", uom: "1 Ltr", retailPrice: 50, bulkPrice5Ltr: 200 },
+    { id: 2, product: "Copper Cleaning", uom: "1 Ltr", retailPrice: 200, bulkPrice5Ltr: 900 },
+    { id: 3, product: "Copper Cleaning ", uom: "500 ML", retailPrice: 100, bulkPrice5Ltr: 900 },
+    { id: 4, product: "Detergent Powder", uom: "1 Kg", retailPrice: 150, bulkPrice5Ltr: 650 },
+    { id: 5, product: "Dish Wash", uom: "500 ML", retailPrice: 100, bulkPrice5Ltr: 900 },
+    { id: 6, product:"Dish Wash", uom: "1 Ltr", retailPrice: 200, bulkPrice5Ltr: 900 },
+    { id: 7, product: "Floor Cleaning", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
+    { id: 8, product: "Hand Wash", uom: "500 ML", retailPrice: 100, bulkPrice5Ltr: 900 },
+    { id: 9, product:"Hand Wash", uom: "1 Ltr", retailPrice: 200, bulkPrice5Ltr: 900 },
+    { id: 10, product: "Liquid Detergent", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
+    { id: 11, product: "Phenyl", uom: "1 Ltr", retailPrice: 60, bulkPrice5Ltr: 250 },
+    { id: 12, product: "Rose Water", uom: "1 Ltr", retailPrice: 60, bulkPrice5Ltr: 250 },
+    { id: 13, product: "Toilet Cleaner", uom: "1 Ltr", retailPrice: 100, bulkPrice5Ltr: 450 },
+    { id: 14, product: "Vaseline", uom: "25 Gms", retailPrice: 25, bulkPrice100Gms: 90 },
+    { id: 15, product: "Zandu Balm", uom: "25 Gms", retailPrice: 80, bulkPrice100Gms: 300 },
 ];
 
 export const packingMaterialsData: PackingData[] = [
