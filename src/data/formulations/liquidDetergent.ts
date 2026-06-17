@@ -10,7 +10,7 @@ export const liquidDetergentFormulation: FormulationData = {
   baseYield: 10,
   TotalQuantity: undefined,
   ingredients: [
-    { slNo: 1, particulars: "Slurry", uom: "KGS", qty: 1.25 },
+    { slNo: 1, particulars: "Acid Slurry", uom: "KGS", qty: 1.25 },
     { slNo: 2, particulars: "Perfume", uom: "LTR", qty: 0.04 },
     { slNo: 3, particulars: "SLES", uom: "KGS", qty: 0.4 },
     { slNo: 4, particulars: "Colour", uom: "LTR", qty: 0.03 },
