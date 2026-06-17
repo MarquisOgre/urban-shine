@@ -93,30 +93,47 @@ const Invoice = () => {
   }, []);
 
   const handleSaveInvoice = async (invoiceData: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({ title: "Not signed in", description: "Please sign in again.", variant: "destructive", duration: 5000 });
+      return;
+    }
     if (selectedInvoice) {
       const { error } = await supabase.from("invoices").update({
         ...invoiceData,
         customer_id: invoiceData.customer_id || null,
       }).eq("id", selectedInvoice.id);
-      if (!error) {
-        toast({ title: "Success", description: "Invoice updated successfully", duration: 3000 });
-        fetchInvoices();
+      if (error) {
+        console.error("Invoice update error:", error);
+        toast({ title: "Save failed", description: error.message, variant: "destructive", duration: 5000 });
+        return;
       }
+      toast({ title: "Success", description: "Invoice updated successfully", duration: 3000 });
+      fetchInvoices();
     } else {
       const { error } = await supabase.from("invoices").insert({
         ...invoiceData,
         amount_paid: 0,
         customer_id: invoiceData.customer_id || null,
+        user_id: user.id,
       });
-      if (!error) {
-        toast({ title: "Success", description: "Invoice created successfully", duration: 3000 });
-        fetchInvoices();
+      if (error) {
+        console.error("Invoice insert error:", error);
+        toast({ title: "Save failed", description: error.message, variant: "destructive", duration: 5000 });
+        return;
       }
+      toast({ title: "Success", description: "Invoice created successfully", duration: 3000 });
+      fetchInvoices();
     }
     setSelectedInvoice(null);
   };
 
   const handleSaveCustomer = async (customerData: any) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({ title: "Not signed in", description: "Please sign in again.", variant: "destructive", duration: 5000 });
+      return;
+    }
     if (customerData.id) {
       const { error } = await supabase.from("customers").update({
         name: customerData.name,
@@ -125,10 +142,13 @@ const Invoice = () => {
         address: customerData.address,
         gst_no: customerData.gst_no,
       }).eq("id", customerData.id);
-      if (!error) {
-        toast({ title: "Success", description: "Customer updated successfully", duration: 3000 });
-        fetchCustomers();
+      if (error) {
+        console.error("Customer update error:", error);
+        toast({ title: "Save failed", description: error.message, variant: "destructive", duration: 5000 });
+        return;
       }
+      toast({ title: "Success", description: "Customer updated successfully", duration: 3000 });
+      fetchCustomers();
     } else {
       const { error } = await supabase.from("customers").insert({
         name: customerData.name,
@@ -136,11 +156,15 @@ const Invoice = () => {
         phone: customerData.phone,
         address: customerData.address,
         gst_no: customerData.gst_no,
+        user_id: user.id,
       });
-      if (!error) {
-        toast({ title: "Success", description: "Customer added successfully", duration: 3000 });
-        fetchCustomers();
+      if (error) {
+        console.error("Customer insert error:", error);
+        toast({ title: "Save failed", description: error.message, variant: "destructive", duration: 5000 });
+        return;
       }
+      toast({ title: "Success", description: "Customer added successfully", duration: 3000 });
+      fetchCustomers();
     }
   };
 
