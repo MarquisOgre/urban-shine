@@ -1,21 +1,21 @@
-
 import { FormulationData } from "../types";
 
+// Rates are resolved dynamically from chemicalPrices (see pricingData.ts).
 export const whitePetroleumJellyFormulation: FormulationData = {
   id: 12,
   name: "White Petroleum Jelly",
   slug: "white-petroleum-jelly",
   category: "Personal Care",
   description: "Pure white petroleum jelly similar to Vaseline",
-  baseYield: 0.25, // Total quantity from ingredients
-  TotalQuantity: undefined, // Set to override auto-calculated quantity (e.g., 10.0)
+  baseYield: 0.25,
+  TotalQuantity: undefined,
   ingredients: [
-    { slNo: 1, particulars: "White Petroleum Jelly Base", uom: "KGS", qty: 0.25, rate: 320, amount: 0.25 * 320 }
+    { slNo: 1, particulars: "White Petroleum Jelly Base", uom: "KGS", qty: 0.25 },
   ],
-  costPer500ML: 0, // Auto-calculated
-  costPer1L: 0, // Auto-calculated  
-  costPer5L: 0, // Auto-calculated
-  costPer500MLBottle: 15.00,
+  costPer500ML: 0,
+  costPer1L: 0,
+  costPer5L: 0,
+  costPer500MLBottle: 15.0,
   costPer1LBottle: null,
   costPer5LBottle: null,
   methodOfPreparation: [
@@ -23,6 +23,6 @@ export const whitePetroleumJellyFormulation: FormulationData = {
     "Add vitamin E for nourishment",
     "Add antioxidant for preservation",
     "Mix thoroughly",
-    "Pour into sterile containers"
-  ]
+    "Pour into sterile containers",
+  ],
 };
