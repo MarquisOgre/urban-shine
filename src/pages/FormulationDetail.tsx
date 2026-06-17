@@ -29,11 +29,11 @@ const FormulationDetail = () => {
 
   const getScaledFormulation = (): FormulationData => {
     const scaleFactor = currentYield / baseFormulation.baseYield;
-    const scaledIngredients = baseFormulation.ingredients.map(ingredient => ({
-      ...ingredient,
-      qty: ingredient.qty * scaleFactor,
-      amount: ingredient.qty * scaleFactor * ingredient.rate
-    }));
+    const scaledIngredients = baseFormulation.ingredients.map(ingredient => {
+      const rate = ingredient.rate ?? 0;
+      const qty = ingredient.qty * scaleFactor;
+      return { ...ingredient, qty, rate, amount: qty * rate };
+    });
 
     return {
       ...baseFormulation,
