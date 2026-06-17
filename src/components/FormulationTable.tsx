@@ -43,8 +43,8 @@ const FormulationTable = ({ name, ingredients }: FormulationTableProps) => {
                   <TableCell className="border font-medium text-xs sm:text-sm">{ingredient.particulars}</TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{ingredient.uom}</TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{ingredient.qty}</TableCell>
-                  <TableCell className="text-center border text-xs sm:text-sm">{ingredient.rate}</TableCell>
-                  <TableCell className="text-center border text-xs sm:text-sm">{ingredient.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-center border text-xs sm:text-sm">{ingredient.rate ?? 0}</TableCell>
+                  <TableCell className="text-center border text-xs sm:text-sm">{(ingredient.amount ?? 0).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

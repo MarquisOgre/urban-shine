@@ -4,8 +4,9 @@ export interface Ingredient {
   particulars: string;
   uom: string;
   qty: number;
-  rate: number;
-  amount: number;
+  // rate & amount are resolved dynamically from chemicalPrices at read time.
+  rate?: number;
+  amount?: number;
 }
 
 export interface FormulationData {

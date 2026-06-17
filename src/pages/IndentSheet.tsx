@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formulationsData } from "@/data/formulations";
+import { formulationsData, getFormulationById } from "@/data/formulations";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ const IndentSheet = () => {
     Object.entries(quantities).forEach(([formulationId, qtyRequired]) => {
       if (qtyRequired <= 0) return;
 
-      const formulation = formulationsData.find((f) => f.id === Number(formulationId));
+      const formulation = getFormulationById(Number(formulationId));
       if (!formulation) return;
 
       const totalQuantity = formulation.TotalQuantity ?? formulation.baseYield;
@@ -60,8 +60,9 @@ const IndentSheet = () => {
 
       formulation.ingredients.forEach((ingredient) => {
         const key = `${ingredient.particulars}_${ingredient.uom}`;
+        const rate = ingredient.rate ?? 0;
         const scaledQty = ingredient.qty * multiplier;
-        const scaledAmount = ingredient.amount * multiplier;
+        const scaledAmount = (ingredient.amount ?? ingredient.qty * rate) * multiplier;
 
         if (ingredientMap.has(key)) {
           const existing = ingredientMap.get(key)!;
@@ -72,7 +73,7 @@ const IndentSheet = () => {
             particulars: ingredient.particulars,
             uom: ingredient.uom,
             totalQty: scaledQty,
-            rate: ingredient.rate,
+            rate,
             totalAmount: scaledAmount,
           });
         }

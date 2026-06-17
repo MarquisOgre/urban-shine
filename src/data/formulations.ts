@@ -30,7 +30,12 @@ const resolveChemicalRate = (particulars: string): number | null => {
 const applyDynamicRates = (formulation: FormulationData): FormulationData => {
   const ingredients = formulation.ingredients.map((ing) => {
     const dynamicRate = resolveChemicalRate(ing.particulars);
-    const rate = dynamicRate !== null ? dynamicRate : ing.rate;
+    if (dynamicRate === null && typeof console !== "undefined") {
+      console.warn(
+        `[formulations] No chemicalPrices entry for "${ing.particulars}". Add it (or an alias) in pricingData.ts.`
+      );
+    }
+    const rate = dynamicRate !== null ? dynamicRate : (ing.rate ?? 0);
     return { ...ing, rate, amount: ing.qty * rate };
   });
   return { ...formulation, ingredients };

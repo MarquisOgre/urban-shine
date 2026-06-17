@@ -10,7 +10,7 @@ interface CostSummaryProps {
 const CostSummary = ({ formulation }: CostSummaryProps) => {
   const autoCalculatedQuantity = formulation.ingredients.reduce((sum, ingredient) => sum + ingredient.qty, 0);
   const totalQuantity = formulation.TotalQuantity || autoCalculatedQuantity;
-  const totalAmount = formulation.ingredients.reduce((sum, ingredient) => sum + ingredient.amount, 0);
+  const totalAmount = formulation.ingredients.reduce((sum, ingredient) => sum + (ingredient.amount ?? 0), 0);
 
   // Auto-calculate cost per litre from total amount and total quantity
   const calculatedCostPerLtr = totalAmount / totalQuantity;
