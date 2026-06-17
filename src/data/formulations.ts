@@ -1,14 +1,49 @@
-
 import { FormulationData, PricingData, PackingData } from "./types";
 import { formulationsData } from "./formulationsList";
-import { productPricesData, packingMaterialsData } from "./pricingData";
+import { productPricesData, packingMaterialsData, chemicalPrices } from "./pricingData";
+
+// Map formulation "particulars" names to chemicalPrices "chemical" names
+// when they don't match exactly. Lookup is case-insensitive and trimmed.
+const chemicalAliasMap: Record<string, string> = {
+  "color": "Colour",
+  "colour": "Colour",
+  "acid slury": "Acid Slurry",
+  "soda ash": "Soda Ash (Sodium Carbonate)",
+  "ss": "SS (Sodium Sulphate) - Global Salt",
+  "sodium sulphate": "SS (Sodium Sulphate) - Global Salt",
+  "tsp": "TSP (Trisodium Phosphate)",
+  "sles": "SLES (Sodium Lauryl Ether Sulfate)",
+  "aos": "AOS (Alpha Olefin Sulphonate)",
+  "bkc": "BKC (Benzalkonium Chloride)",
+  "aplhox": "Alphox 200",
+};
+
+const resolveChemicalRate = (particulars: string): number | null => {
+  const key = particulars.trim().toLowerCase();
+  const target = (chemicalAliasMap[key] || particulars).trim().toLowerCase();
+  const match = chemicalPrices.find(
+    (c) => c.chemical.trim().toLowerCase() === target
+  );
+  return match ? match.rate : null;
+};
+
+const applyDynamicRates = (formulation: FormulationData): FormulationData => {
+  const ingredients = formulation.ingredients.map((ing) => {
+    const dynamicRate = resolveChemicalRate(ing.particulars);
+    const rate = dynamicRate !== null ? dynamicRate : ing.rate;
+    return { ...ing, rate, amount: ing.qty * rate };
+  });
+  return { ...formulation, ingredients };
+};
 
 export const getFormulationById = (id: number): FormulationData | undefined => {
-  return formulationsData.find(formulation => formulation.id === id);
+  const f = formulationsData.find((formulation) => formulation.id === id);
+  return f ? applyDynamicRates(f) : undefined;
 };
 
 export const getFormulationBySlug = (slug: string): FormulationData | undefined => {
-  return formulationsData.find(formulation => formulation.slug === slug);
+  const f = formulationsData.find((formulation) => formulation.slug === slug);
+  return f ? applyDynamicRates(f) : undefined;
 };
 
 export const getProductPrices = (): PricingData[] => {
