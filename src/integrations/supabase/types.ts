@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -23,6 +23,8 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
           address?: string | null
@@ -32,6 +34,8 @@ export type Database = {
           id?: string
           name: string
           phone?: string | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
           address?: string | null
@@ -41,6 +45,8 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -54,7 +60,7 @@ export type Database = {
           customer_id: string | null
           customer_name: string
           customer_phone: string | null
-          discount: number | null
+          discount: number
           id: string
           invoice_date: string
           invoice_number: string
@@ -65,6 +71,8 @@ export type Database = {
           tax_amount: number
           tax_rate: number
           total_amount: number
+          updated_at: string
+          user_id: string
         }
         Insert: {
           amount_paid?: number
@@ -75,7 +83,7 @@ export type Database = {
           customer_id?: string | null
           customer_name: string
           customer_phone?: string | null
-          discount?: number | null
+          discount?: number
           id?: string
           invoice_date?: string
           invoice_number: string
@@ -86,6 +94,8 @@ export type Database = {
           tax_amount?: number
           tax_rate?: number
           total_amount?: number
+          updated_at?: string
+          user_id: string
         }
         Update: {
           amount_paid?: number
@@ -96,7 +106,7 @@ export type Database = {
           customer_id?: string | null
           customer_name?: string
           customer_phone?: string | null
-          discount?: number | null
+          discount?: number
           id?: string
           invoice_date?: string
           invoice_number?: string
@@ -107,6 +117,8 @@ export type Database = {
           tax_amount?: number
           tax_rate?: number
           total_amount?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
