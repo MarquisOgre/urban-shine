@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getTelugu } from "@/data/teluguTranslations";
 
 interface QuantityInput {
   [formulationId: number]: number;
