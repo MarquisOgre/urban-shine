@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 
 interface QuantityInput {
   [formulationId: number]: number;
@@ -86,7 +87,7 @@ const IndentSheet = () => {
 
   const totalAmount = aggregatedIngredients.reduce((sum, ing) => sum + ing.totalAmount, 0);
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
