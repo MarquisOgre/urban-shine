@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Ingredient } from "@/data/types";
+import { getTelugu } from "@/data/teluguTranslations";
 
 interface FormulationTableProps {
   name: string;
