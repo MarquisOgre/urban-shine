@@ -32,9 +32,9 @@ const InvoicePrint = ({ invoice, onClose }: InvoicePrintProps) => {
         {/* Header */}
         <div className="text-center border-b-2 border-slate-800 pb-6 mb-6">
           <div className="flex justify-center mb-4">
-            <img src="/Logo.png" alt="Logo" className="h-16 w-16 object-contain" />
+            <img src="/Logo.png" alt="Logo" className="h-16 w-auto object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">SHINE & SPARKLE</h1>
+          {/* <h1 className="text-2xl font-bold text-slate-800">Urban Shine</h1> */}
           <p className="text-sm text-slate-600 mt-2">
             RK Residency, Haritha Royal City Colony, Ravalkole, Medchal - 501401
           </p>
@@ -127,11 +127,11 @@ const InvoicePrint = ({ invoice, onClose }: InvoicePrintProps) => {
         {/* Footer */}
         <div className="border-t pt-6 mt-8">
           <div className="text-center">
-            <p className="font-bold">SHINE & SPARKLE</p>
+            {/* <p className="font-bold">Urban Shine</p> */}
             <div className="flex justify-center gap-8 text-sm text-slate-600 mt-2">
-              <span>📍 RK Residency, Ravalkole, Medchal</span>
+              <span>📍 #202, RK Residency, Ravalkole, Medchal</span>
               <span>📞 +91 8500 60 6000</span>
-              <span>📧 support@shineandsparkle.com</span>
+              <span>📧 support@urbanshine.com</span>
             </div>
           </div>
           <p className="text-center text-xs text-slate-500 mt-4">

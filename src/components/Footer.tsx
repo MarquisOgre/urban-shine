@@ -11,11 +11,10 @@ const Footer = () => {
               <div className="bg-white rounded-full p-2 flex items-center justify-center">
                 <img
                   src="/Logo.png"
-                  alt="Shine & Sparkle Logo"
-                  className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
-                />
+                  alt="Urban Shine Logo"
+                  className="h-14 w-auto sm:h-14 sm:w-auto object-contain"                />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold">SHINE & SPARKLE</h3>
+              {/* <h3 className="text-lg sm:text-xl font-bold">Urban Shine</h3> */}
             </div>
             <p className="text-slate-300 mb-4 text-sm sm:text-base">
               Expert cleaning formulations. Clear. Precise. Complete.

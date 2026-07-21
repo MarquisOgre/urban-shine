@@ -44,7 +44,7 @@ const Login = () => {
             <Lock className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-2xl text-slate-800">Admin Login</CardTitle>
-          <p className="text-slate-500 text-sm">Shine & Sparkle Management</p>
+          <p className="text-slate-500 text-sm">Urban Shine Management</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -1,9 +1,9 @@
 
-# Welcome to your Dexorzo - Shine & Sparkle project
+# Welcome to your Dexorzo - Urban Shine project
 
 ## Project info
 
-**URL**: https://shine-sparkle.vercel.app/ 
+**URL**: https://urban-shine.vercel.app/ 
 *(Update this link if hosted under a custom domain)*
 
 ## How can I edit this code?
@@ -12,7 +12,7 @@ There are several ways to edit your application.
 
 **Use Vercel**
 
-Simply visit the [Vercel Project](https://shine-sparkle.vercel.app/) and start deploying or editing via the dashboard.
+Simply visit the [Vercel Project](https://urban-shine.vercel.app/) and start deploying or editing via the dashboard.
 
 Changes made via Vercel will be committed automatically to this repo if connected to a Git provider.
 
@@ -24,10 +24,10 @@ The only requirement is having Node.js & npm installed - [install with nvm](http
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone https://github.com/MarquisOgre/Shine-Sparkle
+git clone https://github.com/MarquisOgre/Urban_Shine
 
 # Step 2: Navigate to the project directory.
-cd Shine-Sparkle
+cd Urban_Shine
 
 # Step 3: Install the necessary dependencies.
 npm i

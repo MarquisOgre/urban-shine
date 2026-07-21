@@ -34,8 +34,8 @@ const MobileNav = () => {
       <SheetContent side="right" className="w-[280px] sm:w-[320px] bg-white">
         <div className="flex flex-col space-y-4 mt-8">
           <div className="flex items-center space-x-2 pb-4 border-b">
-            <img src="/Logo.png" alt="Shine & Sparkle Logo" className="h-8 w-8 object-contain" />
-            <span className="font-bold text-lg text-slate-800">SHINE & SPARKLE</span>
+            <img src="/Logo.png" alt="Urban Shine Logo" className="h-8 w-8 object-contain" />
+            <span className="font-bold text-lg text-slate-800">Urban Shine</span>
           </div>
           {menuItems.map((item) => {
             const Icon = item.icon;

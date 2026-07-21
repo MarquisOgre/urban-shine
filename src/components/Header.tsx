@@ -22,11 +22,10 @@ const Header = () => {
                 <img
                   src="/Logo.png"
                   alt="Shine & Sparkle Logo"
-                  className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
-                />
+                  className="h-14 w-auto sm:h-14 sm:w-auto object-contain"                />
             </div>
             <div className="flex flex-col justify-center">
-              <h1 className="text-lg sm:text-2xl font-bold">SHINE & SPARKLE</h1>
+              {/* <h1 className="text-lg sm:text-2xl font-bold">SHINE & SPARKLE</h1> */}
             </div>
           </Link>
           <nav className="hidden md:flex space-x-2 lg:space-x-4 items-center">
