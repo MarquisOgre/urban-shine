@@ -323,6 +323,7 @@ const IndentSheet = () => {
                     <TableRow>
                       <TableHead>Sl No</TableHead>
                       <TableHead>Particulars</TableHead>
+                      <TableHead>Particulars (Telugu)</TableHead>
                       <TableHead>UOM</TableHead>
                       <TableHead className="text-right">Total Qty</TableHead>
                       <TableHead className="text-right">Rate (₹)</TableHead>
@@ -333,12 +334,8 @@ const IndentSheet = () => {
                     {aggregatedIngredients.map((ingredient, index) => (
                       <TableRow key={index}>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium">
-                          <div>{ingredient.particulars}</div>
-                          {getTelugu(ingredient.particulars) && (
-                            <div className="text-xs text-slate-500 mt-0.5">{getTelugu(ingredient.particulars)}</div>
-                          )}
-                        </TableCell>
+                        <TableCell className="font-medium">{ingredient.particulars}</TableCell>
+                        <TableCell className="font-bold">{getTelugu(ingredient.particulars) ?? ""}</TableCell>
                         <TableCell>{ingredient.uom}</TableCell>
                         <TableCell className="text-right">{formatNumber(ingredient.totalQty)}</TableCell>
                         <TableCell className="text-right">₹{ingredient.rate.toFixed(2)}</TableCell>
@@ -348,7 +345,7 @@ const IndentSheet = () => {
                       </TableRow>
                     ))}
                     <TableRow className="bg-slate-100 font-bold">
-                      <TableCell colSpan={5} className="text-right">
+                      <TableCell colSpan={6} className="text-right">
                         Grand Total:
                       </TableCell>
                       <TableCell className="text-right text-lg">₹{totalAmount.toFixed(2)}</TableCell>
