@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 
 interface QuantityInput {
   [formulationId: number]: number;
@@ -86,12 +87,14 @@ const IndentSheet = () => {
 
   const totalAmount = aggregatedIngredients.reduce((sum, ing) => sum + ing.totalAmount, 0);
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
       format: "a4",
     });
+    const teluguReady = await ensureTeluguFont(doc);
+    const teluguFont = teluguReady ? TELUGU_FONT_NAME : undefined;
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const monthYear = format(selectedMonth, "MMMM yyyy");
@@ -157,6 +160,7 @@ const IndentSheet = () => {
     const tableData = aggregatedIngredients.map((ingredient, index) => [
       (index + 1).toString(),
       ingredient.particulars,
+      getTelugu(ingredient.particulars) ?? "",
       ingredient.uom,
       formatNumber(ingredient.totalQty),
       ingredient.rate.toFixed(2),
@@ -169,18 +173,19 @@ const IndentSheet = () => {
       "",
       "",
       "",
+      "",
       "Grand Total:",
       totalAmount.toFixed(2),
     ]);
 
     autoTable(doc, {
       startY: currentY,
-      head: [["Sl No", "Particulars", "UOM", "Total Qty", "Rate", "Total Amt"]],
+      head: [["Sl No", "Particulars", "Particulars (Telugu)", "UOM", "Total Qty", "Rate", "Total Amt"]],
       body: tableData,
       theme: "grid",
       styles: {
-        fontSize: 10,
-        cellPadding: 3,
+        fontSize: 9,
+        cellPadding: 2,
       },
       headStyles: {
         fillColor: [31, 68, 182],
@@ -189,12 +194,13 @@ const IndentSheet = () => {
         halign: "center",
       },
       columnStyles: {
-        0: { halign: "center", cellWidth: 15 },
-        1: { halign: "left", cellWidth: 55 },
-        2: { halign: "center", cellWidth: 20 },
-        3: { halign: "center", cellWidth: 25 },
-        4: { halign: "center", cellWidth: 30 },
-        5: { halign: "center", cellWidth: 35 },
+        0: { halign: "center", cellWidth: 12 },
+        1: { halign: "left", cellWidth: 45 },
+        2: { halign: "left", cellWidth: 45, font: teluguFont, fontStyle: "bold" },
+        3: { halign: "center", cellWidth: 16 },
+        4: { halign: "center", cellWidth: 20 },
+        5: { halign: "center", cellWidth: 20 },
+        6: { halign: "center", cellWidth: 24 },
       },
       didParseCell: (data) => {
         // Style the Grand Total row

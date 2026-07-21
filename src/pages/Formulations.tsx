@@ -23,6 +23,8 @@ import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 
 const Formulations = () => {
   const navigate = useNavigate();
@@ -66,8 +68,10 @@ const Formulations = () => {
     navigate(`/formulation/${formulation.slug}`);
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF('p', 'mm', 'a4'); // Explicitly set A4 format
+    const teluguReady = await ensureTeluguFont(doc);
+    const teluguFont = teluguReady ? TELUGU_FONT_NAME : undefined;
     
     // Company header
     doc.setFontSize(16);
@@ -121,29 +125,31 @@ const Formulations = () => {
       const tableData = formulation.ingredients?.map(ing => [
         ing.slNo,
         ing.particulars,
+        getTelugu(ing.particulars) ?? '',
         ing.uom,
         parseFloat(ing.qty.toFixed(2)),
         parseFloat(ing.rate.toFixed(2)),
         parseFloat(ing.amount.toFixed(2))
       ]) || [];
       
-      // Main ingredients table - width 160mm to fit A4 (210mm - 20mm margins)
+      // Main ingredients table - width 180mm to fit A4 with Telugu column
       autoTable(doc, {
         startY: yPosition,
-        head: [['SL.NO', 'PARTICULARS', 'UOM', 'QTY', 'RATE', 'AMOUNT']],
+        head: [['SL.NO', 'PARTICULARS', 'PARTICULARS (TELUGU)', 'UOM', 'QTY', 'RATE', 'AMOUNT']],
         body: tableData,
         theme: 'grid',
         styles: { fontSize: 9, cellPadding: 2 },
         headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold' },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 20 },
-          1: { cellWidth: 60 },
-          2: { halign: 'center', cellWidth: 20 },
-          3: { halign: 'center', cellWidth: 20 },
-          4: { halign: 'right', cellWidth: 20 },
-          5: { halign: 'right', cellWidth: 20 }
+          0: { halign: 'center', cellWidth: 14 },
+          1: { cellWidth: 45 },
+          2: { cellWidth: 45, font: teluguFont, fontStyle: 'bold' },
+          3: { halign: 'center', cellWidth: 16 },
+          4: { halign: 'center', cellWidth: 16 },
+          5: { halign: 'right', cellWidth: 18 },
+          6: { halign: 'right', cellWidth: 20 }
         },
-        margin: { left: 25 }
+        margin: { left: 15 }
       });
       
       yPosition = (doc as any).lastAutoTable.finalY + 5;
