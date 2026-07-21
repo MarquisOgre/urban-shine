@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getTelugu } from "@/data/teluguTranslations";
 
 interface QuantityInput {
   [formulationId: number]: number;
@@ -332,7 +333,12 @@ const IndentSheet = () => {
                     {aggregatedIngredients.map((ingredient, index) => (
                       <TableRow key={index}>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium">{ingredient.particulars}</TableCell>
+                        <TableCell className="font-medium">
+                          <div>{ingredient.particulars}</div>
+                          {getTelugu(ingredient.particulars) && (
+                            <div className="text-xs text-slate-500 mt-0.5">{getTelugu(ingredient.particulars)}</div>
+                          )}
+                        </TableCell>
                         <TableCell>{ingredient.uom}</TableCell>
                         <TableCell className="text-right">{formatNumber(ingredient.totalQty)}</TableCell>
                         <TableCell className="text-right">₹{ingredient.rate.toFixed(2)}</TableCell>

@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Ingredient } from "@/data/types";
+import { getTelugu } from "@/data/teluguTranslations";
 
 interface FormulationTableProps {
   name: string;
@@ -37,16 +38,24 @@ const FormulationTable = ({ name, ingredients }: FormulationTableProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ingredients.map((ingredient) => (
+              {ingredients.map((ingredient) => {
+                const telugu = getTelugu(ingredient.particulars);
+                return (
                 <TableRow key={ingredient.slNo}>
                   <TableCell className="text-center border font-medium text-xs sm:text-sm">{ingredient.slNo}</TableCell>
-                  <TableCell className="border font-medium text-xs sm:text-sm">{ingredient.particulars}</TableCell>
+                  <TableCell className="border font-medium text-xs sm:text-sm">
+                    <div>{ingredient.particulars}</div>
+                    {telugu && (
+                      <div className="text-[11px] sm:text-xs text-slate-500 mt-0.5">{telugu}</div>
+                    )}
+                  </TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{ingredient.uom}</TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{ingredient.qty}</TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{ingredient.rate ?? 0}</TableCell>
                   <TableCell className="text-center border text-xs sm:text-sm">{(ingredient.amount ?? 0).toFixed(2)}</TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </div>
