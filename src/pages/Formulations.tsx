@@ -23,6 +23,8 @@ import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 
 const Formulations = () => {
   const navigate = useNavigate();
