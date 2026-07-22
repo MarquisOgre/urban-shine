@@ -260,7 +260,15 @@ const Formulations = () => {
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section & Export Button (Top Right)*/}
-          <div className="flex justify-end mb-6 sm:mb-8">
+          <div className="flex justify-end gap-2 mb-6 sm:mb-8">
+            <Button
+              onClick={exportToCSV}
+              variant="outline"
+              className="whitespace-nowrap"
+              title="Export all formulations to CSV"
+            >
+              Export CSV
+            </Button>
             <Button
               onClick={exportToPDF}
               variant="outline"
