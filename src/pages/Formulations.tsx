@@ -22,8 +22,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  try {
+    const res = await fetch('/Logo.png');
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => resolve(null);
+      r.readAsDataURL(blob);
+    });
+  } catch { return null; }
+};
 
 const Formulations = () => {
   const navigate = useNavigate();
@@ -67,189 +82,115 @@ const Formulations = () => {
     navigate(`/formulation/${formulation.slug}`);
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF('p', 'mm', 'a4'); // Explicitly set A4 format
-    
-    // Company header
-    doc.setFontSize(16);
-    doc.setFont(undefined, 'bold');
-    doc.text('URBAN SHINE', 105, 20, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text('FLAT NO - 202, RK RESIDENCY, HARITHA ROYAL CITY COLONY, RAVALKOLE, MEDCHAL - 501401', 105, 30, { align: 'center' });
-    
-    // Get all formulations data
+  const exportToPDF = async () => {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const teluguReady = await ensureTeluguFont(doc);
+    const logoDataUrl = await loadLogoDataUrl();
+
+    const pageW = 210;
+    const pageH = 297;
+    const marginX = 10;
+
+    const drawHeader = () => {
+      if (logoDataUrl) {
+        try { doc.addImage(logoDataUrl, 'PNG', pageW / 2 - 15, 6, 30, 15); } catch {}
+      }
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.text('FLAT NO - 202, RK RESIDENCY, HARITHA ROYAL CITY COLONY, RAVALKOLE, MEDCHAL - 501401', pageW / 2, 25, { align: 'center' });
+    };
+
+    drawHeader();
+    let yPosition = 32;
+
     const allFormulationsData = formulations
-      .filter(f => f.id <= 12) // Only actual formulations, not pricing pages
+      .filter(f => f.id <= 12)
       .map(f => {
         const formData = getFormulationBySlug(f.slug);
         return formData ? { ...f, ...formData } : null;
       })
       .filter(Boolean);
 
-    let yPosition = 50;
-    
-    allFormulationsData.forEach((formulation, index) => {
-      if (index > 0) {
+    allFormulationsData.forEach((formulation) => {
+      const ingredientCount = formulation.ingredients?.length || 0;
+      const estBlockH = 5 + 6 + ingredientCount * 5 + 10 + 6;
+
+      if (yPosition + estBlockH > pageH - 8) {
         doc.addPage();
-        yPosition = 20;
+        drawHeader();
+        yPosition = 32;
       }
-      
-      // Formulation name
-      doc.setFontSize(14);
+
+      doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
-      doc.text(formulation.name, 105, yPosition, { align: 'center' });
-      yPosition += 15;
-      
-      // Calculate total cost from ingredients
+      doc.text(formulation.name, pageW / 2, yPosition, { align: 'center' });
+      yPosition += 3;
+
       const totalCost = formulation.ingredients?.reduce((sum, ing) => sum + parseFloat(ing.amount.toFixed(2)), 0) || 0;
       const baseYield = formulation.baseYield || 10;
-      
-      // Calculate costs
       const costPerLiter = totalCost / baseYield;
-      const costPer500ML = (costPerLiter * 0.5);
+      const costPer500ML = costPerLiter * 0.5;
       const costPer1L = costPerLiter;
-      
-      // Bottle costs
       const bottle500MLCost = formulation.costPer500MLBottle || 10.55;
       const bottle1LCost = formulation.costPer1LBottle || 0;
-      
       const totalCostPer500MLBottle = costPer500ML + bottle500MLCost;
       const totalCostPer1LBottle = costPer1L + bottle1LCost;
-      
-      // Ingredients table with properly formatted amounts
+
       const tableData = formulation.ingredients?.map(ing => [
         ing.slNo,
         ing.particulars,
+        getTelugu(ing.particulars) ?? '',
         ing.uom,
         parseFloat(ing.qty.toFixed(2)),
         parseFloat(ing.rate.toFixed(2)),
         parseFloat(ing.amount.toFixed(2))
       ]) || [];
-      
-      // Main ingredients table - width 160mm to fit A4 (210mm - 20mm margins)
+
       autoTable(doc, {
         startY: yPosition,
-        head: [['SL.NO', 'PARTICULARS', 'UOM', 'QTY', 'RATE', 'AMOUNT']],
+        head: [['SL', 'PARTICULARS', 'తెలుగు', 'UOM', 'QTY', 'RATE', 'AMT']],
         body: tableData,
         theme: 'grid',
-        styles: { fontSize: 9, cellPadding: 2 },
-        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 8, cellPadding: 1.2, font: teluguReady ? TELUGU_FONT_NAME : undefined },
+        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 8 },
         columnStyles: {
-          0: { halign: 'center', cellWidth: 20 },
-          1: { cellWidth: 60 },
-          2: { halign: 'center', cellWidth: 20 },
-          3: { halign: 'center', cellWidth: 20 },
-          4: { halign: 'right', cellWidth: 20 },
-          5: { halign: 'right', cellWidth: 20 }
+          0: { halign: 'center', cellWidth: 10 },
+          1: { cellWidth: 55 },
+          2: { cellWidth: 50, font: teluguReady ? TELUGU_FONT_NAME : undefined },
+          3: { halign: 'center', cellWidth: 15 },
+          4: { halign: 'center', cellWidth: 15 },
+          5: { halign: 'right', cellWidth: 17 },
+          6: { halign: 'right', cellWidth: 18 }
         },
-        margin: { left: 25 }
+        margin: { left: marginX, right: marginX }
       });
-      
+
+      yPosition = (doc as any).lastAutoTable.finalY + 1;
+
+      autoTable(doc, {
+        startY: yPosition,
+        body: [
+          ['Cost / 500 ML Bottle', costPer500ML.toFixed(2), bottle500MLCost.toFixed(2), totalCostPer500MLBottle.toFixed(2)],
+          ['Cost / 1 Ltr Bottle', costPer1L.toFixed(2), bottle1LCost.toFixed(2), totalCostPer1LBottle.toFixed(2)],
+        ],
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 1.2 },
+        columnStyles: {
+          0: { cellWidth: 90, fontStyle: 'bold' },
+          1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+          2: { cellWidth: 30, halign: 'center' },
+          3: { cellWidth: 40, halign: 'right', fontStyle: 'bold' }
+        },
+        margin: { left: marginX, right: marginX }
+      });
+
       yPosition = (doc as any).lastAutoTable.finalY + 5;
-      
-      // Cost summary tables - matching the same total width (160mm)
-      // Cost per 500 ML bottle
-      autoTable(doc, {
-        startY: yPosition,
-        body: [
-          ['Cost / Per 500 ML Bottle', `${costPer500ML.toFixed(2)}`, bottle500MLCost.toFixed(2), totalCostPer500MLBottle.toFixed(2)]
-        ],
-        theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 2 },
-        columnStyles: {
-          0: { cellWidth: 80, fontStyle: 'bold' },
-          1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
-          2: { cellWidth: 25, halign: 'center' },
-          3: { cellWidth: 25, halign: 'right' }
-        },
-        margin: { left: 25 }
-      });
-      
-      yPosition = (doc as any).lastAutoTable.finalY + 2;
-      
-      // Cost per 1L bottle and cost per liter
-      autoTable(doc, {
-        startY: yPosition,
-        body: [
-          ['Cost / Per 1 Ltr Bottle', `${costPer1L.toFixed(2)}`, 'Cost / Ltr', totalCostPer1LBottle.toFixed(2)]
-        ],
-        theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 2 },
-        columnStyles: {
-          0: { cellWidth: 80, fontStyle: 'bold' },
-          1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
-          2: { cellWidth: 25, halign: 'center', fontStyle: 'bold' },
-          3: { cellWidth: 25, halign: 'right' }
-        },
-        margin: { left: 25 }
-      });
-      
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
-      
-      // Method of preparation
-      if (formulation.methodOfPreparation?.length > 0) {
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text('METHOD OF PREPARATION', 105, yPosition, { align: 'center' });
-        yPosition += 10;
-        
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        formulation.methodOfPreparation.forEach((step, i) => {
-          const wrappedText = doc.splitTextToSize(`${i + 1}. ${step}`, 160);
-          doc.text(wrappedText, 25, yPosition);
-          yPosition += wrappedText.length * 5 + 2;
-        });
-      }
     });
-    
+
     doc.save('Formulations.pdf');
   };
 
-  const exportToCSV = () => {
-    const esc = (v: string | number) => {
-      const s = String(v ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines: string[] = [];
-    const allData = formulations
-      .filter((f) => f.id <= 12)
-      .map((f) => ({ meta: f, data: getFormulationBySlug(f.slug) }))
-      .filter((x) => x.data);
 
-    allData.forEach(({ meta, data }, idx) => {
-      if (idx > 0) lines.push("");
-      lines.push(esc(meta.name.toUpperCase()));
-      lines.push(
-        ["SL.NO", "Particulars (English)", "Particulars (Telugu)", "UOM", "QTY", "RATE", "AMOUNT"]
-          .map(esc)
-          .join(",")
-      );
-      (data!.ingredients || []).forEach((ing: any) => {
-        lines.push(
-          [
-            ing.slNo,
-            esc(ing.particulars),
-            esc(getTelugu(ing.particulars) ?? ""),
-            esc(ing.uom),
-            ing.qty,
-            (ing.rate ?? 0).toFixed(2),
-            (ing.amount ?? 0).toFixed(2),
-          ].join(",")
-        );
-      });
-    });
-
-    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Formulations.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
 
 
@@ -261,14 +202,6 @@ const Formulations = () => {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section & Export Button (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
-            <Button
-              onClick={exportToCSV}
-              variant="outline"
-              className="whitespace-nowrap"
-              title="Export all formulations to CSV"
-            >
-              Export CSV
-            </Button>
             <Button
               onClick={exportToPDF}
               variant="outline"
