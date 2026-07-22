@@ -22,8 +22,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import { getTelugu } from "@/data/teluguTranslations";
+import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  try {
+    const res = await fetch('/Logo.png');
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => resolve(null);
+      r.readAsDataURL(blob);
+    });
+  } catch { return null; }
+};
 
 const Formulations = () => {
   const navigate = useNavigate();
