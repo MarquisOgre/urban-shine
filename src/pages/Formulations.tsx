@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
+import { getTelugu } from "@/data/teluguTranslations";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
