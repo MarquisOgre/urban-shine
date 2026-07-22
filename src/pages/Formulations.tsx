@@ -148,15 +148,15 @@ const Formulations = () => {
 
       autoTable(doc, {
         startY: yPosition,
-        head: [['SL', 'PARTICULARS', 'తెలుగు', 'UOM', 'QTY', 'RATE', 'AMT']],
+        head: [['SL', 'PARTICULARS', 'PARTICULARS (TELUGU)', 'UOM', 'QTY', 'RATE', 'AMT']],
         body: tableData,
         theme: 'grid',
-        styles: { fontSize: 8, cellPadding: 1.2, font: teluguReady ? TELUGU_FONT_NAME : undefined },
-        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+        styles: { fontSize: 10, cellPadding: 1.5 },
+        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 10 },
         columnStyles: {
           0: { halign: 'center', cellWidth: 10 },
           1: { cellWidth: 55 },
-          2: { cellWidth: 50, font: teluguReady ? TELUGU_FONT_NAME : undefined },
+          2: { cellWidth: 50, font: teluguReady ? TELUGU_FONT_NAME : undefined, fontStyle: 'bold' },
           3: { halign: 'center', cellWidth: 15 },
           4: { halign: 'center', cellWidth: 15 },
           5: { halign: 'right', cellWidth: 17 },
@@ -174,12 +174,12 @@ const Formulations = () => {
           ['Cost / 1 Ltr Bottle', costPer1L.toFixed(2), bottle1LCost.toFixed(2), totalCostPer1LBottle.toFixed(2)],
         ],
         theme: 'grid',
-        styles: { fontSize: 8, cellPadding: 1.2 },
+        styles: { fontSize: 10, cellPadding: 1.5 },
         columnStyles: {
-          0: { cellWidth: 90, fontStyle: 'bold' },
-          1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+          0: { cellWidth: 65, fontStyle: 'bold' },
+          1: { cellWidth: 55, halign: 'center', fontStyle: 'bold' },
           2: { cellWidth: 30, halign: 'center' },
-          3: { cellWidth: 40, halign: 'right', fontStyle: 'bold' }
+          3: { cellWidth: 30, halign: 'right', fontStyle: 'bold' }
         },
         margin: { left: marginX, right: marginX }
       });
