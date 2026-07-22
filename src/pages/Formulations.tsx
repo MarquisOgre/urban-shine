@@ -203,14 +203,6 @@ const Formulations = () => {
           {/* Hero Section & Export Button (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
             <Button
-              onClick={exportToCSV}
-              variant="outline"
-              className="whitespace-nowrap"
-              title="Export all formulations to CSV"
-            >
-              Export CSV
-            </Button>
-            <Button
               onClick={exportToPDF}
               variant="outline"
               className="whitespace-nowrap"
