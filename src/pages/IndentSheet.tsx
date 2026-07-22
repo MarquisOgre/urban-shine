@@ -364,14 +364,16 @@ const IndentSheet = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-slate-800">Total Required Ingredients</h2>
-                <Button
-                  onClick={exportToPDF}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <FileDown className="h-4 w-4" />
-                  Export PDF
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={exportToCSV} variant="outline" className="gap-2">
+                    <FileDown className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button onClick={exportToPDF} variant="outline" className="gap-2">
+                    <FileDown className="h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
