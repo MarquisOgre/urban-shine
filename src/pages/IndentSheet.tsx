@@ -215,6 +215,56 @@ const IndentSheet = () => {
     toast.success("PDF exported successfully");
   };
 
+  const exportToCSV = () => {
+    const monthYear = format(selectedMonth, "MMMM yyyy");
+    const esc = (v: string | number) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines: string[] = [];
+    lines.push(esc(`Indent Sheet - ${monthYear}`));
+    lines.push("");
+    const indentItems = Object.entries(quantities).filter(([, q]) => q > 0);
+    if (indentItems.length) {
+      lines.push("Indent Items");
+      lines.push(["Product Name", "Quantity Required"].map(esc).join(","));
+      indentItems.forEach(([id, qty]) => {
+        const f = formulationsData.find((x) => x.id === Number(id));
+        if (f) lines.push([esc(f.name), esc(qty)].join(","));
+      });
+      lines.push("");
+    }
+    lines.push("Total Required Ingredients");
+    lines.push(
+      ["Sl No", "Particulars (English)", "Particulars (Telugu)", "UOM", "Total Qty", "Rate", "Total Amount"]
+        .map(esc)
+        .join(",")
+    );
+    aggregatedIngredients.forEach((ing, i) => {
+      lines.push(
+        [
+          i + 1,
+          esc(ing.particulars),
+          esc(getTelugu(ing.particulars) ?? ""),
+          esc(ing.uom),
+          formatNumber(ing.totalQty),
+          ing.rate.toFixed(2),
+          ing.totalAmount.toFixed(2),
+        ].join(",")
+      );
+    });
+    lines.push(["", "", "", "", "", "Grand Total", totalAmount.toFixed(2)].map(esc).join(","));
+
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Indent_Sheet_${monthYear.replace(" ", "_")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported successfully");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
       <Header />
@@ -314,23 +364,25 @@ const IndentSheet = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-slate-800">Total Required Ingredients</h2>
-                <Button
-                  onClick={exportToPDF}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <FileDown className="h-4 w-4" />
-                  Export PDF
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={exportToCSV} variant="outline" className="gap-2">
+                    <FileDown className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                  <Button onClick={exportToPDF} variant="outline" className="gap-2">
+                    <FileDown className="h-4 w-4" />
+                    Export PDF
+                  </Button>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Sl No</TableHead>
-                      <TableHead>Particulars</TableHead>
-                      <TableHead>Particulars (Telugu)</TableHead>
-                      <TableHead>UOM</TableHead>
+                      <TableHead className="whitespace-nowrap">Sl No</TableHead>
+                      <TableHead className="min-w-[140px] whitespace-nowrap">Particulars (English)</TableHead>
+                      <TableHead className="min-w-[140px] whitespace-nowrap">Particulars (Telugu)</TableHead>
+                      <TableHead className="whitespace-nowrap">UOM</TableHead>
                       <TableHead className="text-right">Total Qty</TableHead>
                       <TableHead className="text-right">Rate (₹)</TableHead>
                       <TableHead className="text-right">Total Amount (₹)</TableHead>
