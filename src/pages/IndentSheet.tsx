@@ -327,10 +327,10 @@ const IndentSheet = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Sl No</TableHead>
-                      <TableHead>Particulars</TableHead>
-                      <TableHead>Particulars (Telugu)</TableHead>
-                      <TableHead>UOM</TableHead>
+                      <TableHead className="whitespace-nowrap">Sl No</TableHead>
+                      <TableHead className="min-w-[140px] whitespace-nowrap">Particulars (English)</TableHead>
+                      <TableHead className="min-w-[140px] whitespace-nowrap">Particulars (Telugu)</TableHead>
+                      <TableHead className="whitespace-nowrap">UOM</TableHead>
                       <TableHead className="text-right">Total Qty</TableHead>
                       <TableHead className="text-right">Rate (₹)</TableHead>
                       <TableHead className="text-right">Total Amount (₹)</TableHead>
