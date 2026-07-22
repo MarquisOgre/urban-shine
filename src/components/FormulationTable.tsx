@@ -30,8 +30,8 @@ const FormulationTable = ({ name, ingredients }: FormulationTableProps) => {
             <TableHeader>
               <TableRow className="bg-slate-100">
                 <TableHead className="text-center font-bold border text-xs sm:text-sm whitespace-nowrap">SL.NO</TableHead>
-                <TableHead className="text-center font-bold border text-xs sm:text-sm min-w-[120px]">PARTICULARS</TableHead>
-                <TableHead className="text-center font-bold border text-xs sm:text-sm min-w-[120px] whitespace-nowrap">PARTICULARS (TELUGU)</TableHead>
+                <TableHead className="text-center font-bold border text-xs sm:text-sm min-w-[140px] whitespace-nowrap">PARTICULARS (ENGLISH)</TableHead>
+                <TableHead className="text-center font-bold border text-xs sm:text-sm min-w-[140px] whitespace-nowrap">PARTICULARS (TELUGU)</TableHead>
                 <TableHead className="text-center font-bold border text-xs sm:text-sm whitespace-nowrap">UOM</TableHead>
                 <TableHead className="text-center font-bold border text-xs sm:text-sm whitespace-nowrap">QTY</TableHead>
                 <TableHead className="text-center font-bold border text-xs sm:text-sm whitespace-nowrap">RATE</TableHead>
