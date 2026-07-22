@@ -208,6 +208,50 @@ const Formulations = () => {
     doc.save('Formulations.pdf');
   };
 
+  const exportToCSV = () => {
+    const esc = (v: string | number) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines: string[] = [];
+    const allData = formulations
+      .filter((f) => f.id <= 12)
+      .map((f) => ({ meta: f, data: getFormulationBySlug(f.slug) }))
+      .filter((x) => x.data);
+
+    allData.forEach(({ meta, data }, idx) => {
+      if (idx > 0) lines.push("");
+      lines.push(esc(meta.name.toUpperCase()));
+      lines.push(
+        ["SL.NO", "Particulars (English)", "Particulars (Telugu)", "UOM", "QTY", "RATE", "AMOUNT"]
+          .map(esc)
+          .join(",")
+      );
+      (data!.ingredients || []).forEach((ing: any) => {
+        lines.push(
+          [
+            ing.slNo,
+            esc(ing.particulars),
+            esc(getTelugu(ing.particulars) ?? ""),
+            esc(ing.uom),
+            ing.qty,
+            (ing.rate ?? 0).toFixed(2),
+            (ing.amount ?? 0).toFixed(2),
+          ].join(",")
+        );
+      });
+    });
+
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Formulations.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
