@@ -1,20 +1,51 @@
-// Render Telugu (or any complex-script) text to a PNG data URL using the
-// browser's canvas text rendering, which performs proper Indic shaping.
-// jsPDF cannot shape Indic scripts even with a Unicode font, so we embed
-// the rendered text as an image inside the PDF cells.
+// Render Telugu (Indic) text to a PNG data URL using the browser's canvas
+// text rendering, which performs proper complex-script shaping (reordering
+// of vowel signs, formation of conjuncts). jsPDF cannot shape Indic scripts
+// even with a Unicode font loaded, so we embed rendered text as images.
 
-const cache = new Map<string, { dataUrl: string; width: number; height: number }>();
+const FONT_URL =
+  "https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/hinted/ttf/NotoSansTelugu/NotoSansTelugu-Regular.ttf";
+const FONT_URL_BOLD =
+  "https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts/hinted/ttf/NotoSansTelugu/NotoSansTelugu-Bold.ttf";
+const FAMILY = "NotoSansTeluguWeb";
+
+let fontLoadPromise: Promise<boolean> | null = null;
+
+const loadBrowserFont = (): Promise<boolean> => {
+  if (fontLoadPromise) return fontLoadPromise;
+  fontLoadPromise = (async () => {
+    try {
+      if (typeof (window as any).FontFace === "undefined" || !(document as any).fonts) {
+        return false;
+      }
+      const [regular, bold] = await Promise.all([
+        new FontFace(FAMILY, `url(${FONT_URL})`, { weight: "400" }).load(),
+        new FontFace(FAMILY, `url(${FONT_URL_BOLD})`, { weight: "700" }).load().catch(() =>
+          new FontFace(FAMILY, `url(${FONT_URL})`, { weight: "700" }).load()
+        ),
+      ]);
+      (document as any).fonts.add(regular);
+      (document as any).fonts.add(bold);
+      await (document as any).fonts.load(`700 40px "${FAMILY}"`);
+      return true;
+    } catch (e) {
+      console.warn("Telugu web font load failed:", e);
+      return false;
+    }
+  })();
+  return fontLoadPromise;
+};
+
+export const ensureTeluguBrowserFont = () => loadBrowserFont();
+
+const cache = new Map<string, RenderedText>();
 
 export interface RenderedText {
   dataUrl: string;
-  width: number;   // px at the render scale
-  height: number;  // px at the render scale
+  width: number;
+  height: number;
 }
 
-/**
- * Renders text to a transparent PNG using a Telugu-capable system font stack.
- * The result is cached per (text + fontPx + bold) key.
- */
 export const renderTeluguToPng = (
   text: string,
   fontPx = 40,
@@ -25,9 +56,7 @@ export const renderTeluguToPng = (
   const hit = cache.get(key);
   if (hit) return hit;
 
-  const fontStack =
-    '"Noto Sans Telugu","Gautami","Nirmala UI","Mallanna","Ramabhadra",' +
-    '"Suranna","Tenali Ramakrishna","Lohit Telugu",sans-serif';
+  const fontStack = `"${FAMILY}","Noto Sans Telugu","Gautami","Nirmala UI",sans-serif`;
   const weight = bold ? "700" : "400";
   const font = `${weight} ${fontPx}px ${fontStack}`;
 
@@ -35,8 +64,8 @@ export const renderTeluguToPng = (
   if (!measurer) return null;
   measurer.font = font;
   const metrics = measurer.measureText(text);
-  const width = Math.ceil(metrics.width) + 8;
-  const height = Math.ceil(fontPx * 1.6);
+  const width = Math.max(1, Math.ceil(metrics.width) + 8);
+  const height = Math.ceil(fontPx * 1.7);
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
