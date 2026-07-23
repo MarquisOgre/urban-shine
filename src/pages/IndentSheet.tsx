@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getTelugu } from "@/data/teluguTranslations";
-import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
+import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 
 interface QuantityInput {
   [formulationId: number]: number;
@@ -93,8 +93,8 @@ const IndentSheet = () => {
       unit: "mm",
       format: "a4",
     });
-    const teluguReady = await ensureTeluguFont(doc);
-    const teluguFont = teluguReady ? TELUGU_FONT_NAME : undefined;
+    await ensureTeluguBrowserFont();
+    const TELUGU_COL = 2;
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const monthYear = format(selectedMonth, "MMMM yyyy");
@@ -156,16 +156,19 @@ const IndentSheet = () => {
     doc.text("Total Required Ingredients", 14, currentY);
     currentY += 7;
 
-    // Table data
-    const tableData = aggregatedIngredients.map((ingredient, index) => [
-      (index + 1).toString(),
-      ingredient.particulars,
-      getTelugu(ingredient.particulars) ?? "",
-      ingredient.uom,
-      formatNumber(ingredient.totalQty),
-      ingredient.rate.toFixed(2),
-      ingredient.totalAmount.toFixed(2),
-    ]);
+    const teluguByRow: string[] = [];
+    const tableData = aggregatedIngredients.map((ingredient, index) => {
+      teluguByRow[index] = getTelugu(ingredient.particulars) ?? "";
+      return [
+        (index + 1).toString(),
+        ingredient.particulars,
+        "",
+        ingredient.uom,
+        formatNumber(ingredient.totalQty),
+        ingredient.rate.toFixed(2),
+        ingredient.totalAmount.toFixed(2),
+      ];
+    });
 
     // Add Grand Total row
     tableData.push([
@@ -186,6 +189,7 @@ const IndentSheet = () => {
       styles: {
         fontSize: 9,
         cellPadding: 2,
+        minCellHeight: 7,
       },
       headStyles: {
         fillColor: [31, 68, 182],
@@ -196,7 +200,7 @@ const IndentSheet = () => {
       columnStyles: {
         0: { halign: "center", cellWidth: 12 },
         1: { halign: "left", cellWidth: 45 },
-        2: { halign: "left", cellWidth: 45, font: teluguFont, fontStyle: "bold" },
+        2: { halign: "left", cellWidth: 45 },
         3: { halign: "center", cellWidth: 16 },
         4: { halign: "center", cellWidth: 20 },
         5: { halign: "center", cellWidth: 20 },
@@ -208,6 +212,26 @@ const IndentSheet = () => {
           data.cell.styles.fontStyle = "bold";
           data.cell.styles.fillColor = [240, 240, 240];
         }
+      },
+      didDrawCell: (data) => {
+        if (data.section !== "body" || data.column.index !== TELUGU_COL) return;
+        if (data.row.index >= teluguByRow.length) return;
+        const text = teluguByRow[data.row.index];
+        if (!text) return;
+        const img = renderTeluguToPng(text, 40, true);
+        if (!img) return;
+        const cell = data.cell;
+        const padX = 1.5;
+        const padY = 0.5;
+        const maxW = cell.width - padX * 2;
+        const maxH = cell.height - padY * 2;
+        const ratio = img.width / img.height;
+        let h = maxH;
+        let w = h * ratio;
+        if (w > maxW) { w = maxW; h = w / ratio; }
+        const x = cell.x + padX;
+        const y = cell.y + (cell.height - h) / 2;
+        try { doc.addImage(img.dataUrl, "PNG", x, y, w, h); } catch {}
       },
     });
 

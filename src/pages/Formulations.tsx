@@ -22,7 +22,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import { getTelugu } from "@/data/teluguTranslations";
-import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
+import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -84,7 +84,7 @@ const Formulations = () => {
 
   const exportToPDF = async () => {
     const doc = new jsPDF('p', 'mm', 'a4');
-    const teluguReady = await ensureTeluguFont(doc);
+    await ensureTeluguBrowserFont();
     const logoDataUrl = await loadLogoDataUrl();
 
     const pageW = 210;
@@ -111,6 +111,8 @@ const Formulations = () => {
       })
       .filter(Boolean);
 
+    const TELUGU_COL = 2;
+
     allFormulationsData.forEach((formulation) => {
       const ingredientCount = formulation.ingredients?.length || 0;
       const estBlockH = 5 + 6 + ingredientCount * 5 + 10 + 6;
@@ -136,33 +138,58 @@ const Formulations = () => {
       const totalCostPer500MLBottle = costPer500ML + bottle500MLCost;
       const totalCostPer1LBottle = costPer1L + bottle1LCost;
 
-      const tableData = formulation.ingredients?.map(ing => [
-        ing.slNo,
-        ing.particulars,
-        getTelugu(ing.particulars) ?? '',
-        ing.uom,
-        parseFloat(ing.qty.toFixed(2)),
-        parseFloat(ing.rate.toFixed(2)),
-        parseFloat(ing.amount.toFixed(2))
-      ]) || [];
+      // Keep Telugu text out of the cell body (jsPDF can't shape Indic).
+      // We draw it as an image in didDrawCell instead.
+      const teluguByRow: string[] = [];
+      const tableData = formulation.ingredients?.map((ing, idx) => {
+        teluguByRow[idx] = getTelugu(ing.particulars) ?? '';
+        return [
+          ing.slNo,
+          ing.particulars,
+          '',
+          ing.uom,
+          parseFloat(ing.qty.toFixed(2)),
+          parseFloat(ing.rate.toFixed(2)),
+          parseFloat(ing.amount.toFixed(2))
+        ];
+      }) || [];
 
       autoTable(doc, {
         startY: yPosition,
         head: [['SL', 'PARTICULARS', 'PARTICULARS (TELUGU)', 'UOM', 'QTY', 'RATE', 'AMT']],
         body: tableData,
         theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 1.5 },
+        styles: { fontSize: 10, cellPadding: 1.5, minCellHeight: 6 },
         headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 10 },
         columnStyles: {
           0: { halign: 'center', cellWidth: 10 },
           1: { cellWidth: 55 },
-          2: { cellWidth: 50, font: teluguReady ? TELUGU_FONT_NAME : undefined, fontStyle: 'bold' },
+          2: { cellWidth: 50 },
           3: { halign: 'center', cellWidth: 15 },
           4: { halign: 'center', cellWidth: 15 },
           5: { halign: 'right', cellWidth: 17 },
           6: { halign: 'right', cellWidth: 18 }
         },
-        margin: { left: marginX, right: marginX }
+        margin: { left: marginX, right: marginX },
+        didDrawCell: (data) => {
+          if (data.section !== 'body' || data.column.index !== TELUGU_COL) return;
+          const text = teluguByRow[data.row.index];
+          if (!text) return;
+          const img = renderTeluguToPng(text, 40, true);
+          if (!img) return;
+          const cell = data.cell;
+          const padX = 1.5;
+          const padY = 0.5;
+          const maxW = cell.width - padX * 2;
+          const maxH = cell.height - padY * 2;
+          const ratio = img.width / img.height;
+          let h = maxH;
+          let w = h * ratio;
+          if (w > maxW) { w = maxW; h = w / ratio; }
+          const x = cell.x + padX;
+          const y = cell.y + (cell.height - h) / 2;
+          try { doc.addImage(img.dataUrl, 'PNG', x, y, w, h); } catch {}
+        }
       });
 
       yPosition = (doc as any).lastAutoTable.finalY + 1;
