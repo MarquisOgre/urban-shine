@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getTelugu } from "@/data/teluguTranslations";
-import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
+import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 
 interface QuantityInput {
   [formulationId: number]: number;
