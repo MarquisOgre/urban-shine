@@ -22,7 +22,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFormulationBySlug } from "@/data/formulations";
 import { getTelugu } from "@/data/teluguTranslations";
-import { ensureTeluguFont, TELUGU_FONT_NAME } from "@/lib/teluguPdfFont";
+import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
