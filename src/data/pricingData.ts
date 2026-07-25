@@ -62,7 +62,7 @@ export const chemicalPrices: ChemicalData[] = [
   { id: 21, chemical: "SLES (Sodium Lauryl Ether Sulfate)", rate: 100, uom: "KG" },
   { id: 22, chemical: "Soda Ash (Sodium Carbonate)", rate: 60, uom: "KG" },
   { id: 23, chemical: "Sodium Benzoate", rate: 280, uom: "KG" },
-  { id: 24, chemical: "SS (Sodium Sulphate)", rate: 35, uom: "KG" },
+  { id: 24, chemical: "Sodium Sulphate", rate: 35, uom: "KG" },
   { id: 25, chemical: "Tinopal", rate: 220, uom: "KG" },
   { id: 26, chemical: "TSP (Trisodium Phosphate)", rate: 30, uom: "KG" },
   { id: 27, chemical: "White Petroleum Jelly Base", rate: 320, uom: "KG" },

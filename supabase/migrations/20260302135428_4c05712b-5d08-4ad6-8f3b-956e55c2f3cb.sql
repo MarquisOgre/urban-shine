@@ -128,7 +128,7 @@ INSERT INTO public.chemical_prices (id, chemical, rate, uom) VALUES
 (21, 'SLES (Sodium Lauryl Ether Sulfate)', 100, 'KG'),
 (22, 'Soda Ash (Sodium Carbonate)', 60, 'KG'),
 (23, 'Sodium Benzoate', 280, 'KG'),
-(24, 'SS (Sodium Sulphate)', 35, 'KG'),
+(24, 'Sodium Sulphate', 35, 'KG'),
 (25, 'Tinopal', 220, 'KG'),
 (26, 'TSP (Trisodium Phosphate)', 30, 'KG'),
 (27, 'White Petroleum Jelly Base', 320, 'KG');
