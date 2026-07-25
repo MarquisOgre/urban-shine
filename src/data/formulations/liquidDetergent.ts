@@ -14,7 +14,7 @@ export const liquidDetergentFormulation: FormulationData = {
     { slNo: 2, particulars: "Perfume", uom: "LTR", qty: 0.04 },
     { slNo: 3, particulars: "SLES", uom: "KGS", qty: 0.4 },
     { slNo: 4, particulars: "Color", uom: "LTR", qty: 0.03 },
-    { slNo: 5, particulars: "Aplhox 200", uom: "LTR", qty: 0.04 },
+    { slNo: 5, particulars: "Alphox 200", uom: "LTR", qty: 0.04 },
     { slNo: 6, particulars: "Citric Acid", uom: "LTR", qty: 0.05 },
     { slNo: 7, particulars: "RO Water", uom: "LTR", qty: 8.5 },
     { slNo: 8, particulars: "Caustic Soda", uom: "KGS", qty: 0.025 },

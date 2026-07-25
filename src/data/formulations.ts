@@ -13,7 +13,7 @@ const chemicalAliasMap: Record<string, string> = {
   "sles": "SLES (Sodium Lauryl Ether Sulfate)",
   "aos": "AOS (Alpha Olefin Sulphonate)",
   "bkc": "BKC (Benzalkonium Chloride)",
-  "aplhox 200": "Alphox 200",
+  "alphox 200": "Alphox 200",
 };
 
 const resolveChemicalRate = (particulars: string): number | null => {
