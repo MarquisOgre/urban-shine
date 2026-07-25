@@ -12,7 +12,7 @@ export const detergentPowderFormulation: FormulationData = {
   ingredients: [
     { slNo: 1, particulars: "Soda Ash", uom: "KGS", qty: 4.0 },
     { slNo: 2, particulars: "Acid Slurry", uom: "KGS", qty: 1.0 },
-    { slNo: 3, particulars: "SS", uom: "KGS", qty: 1.0 },
+    { slNo: 3, particulars: "Sodium Sulphate", uom: "KGS", qty: 1.0 },
     { slNo: 4, particulars: "Jasmine Perfume", uom: "KGS", qty: 0.025 },
     { slNo: 5, particulars: "TSP", uom: "KGS", qty: 0.5 },
     { slNo: 6, particulars: "Crystals", uom: "KGS", qty: 0.1 },
