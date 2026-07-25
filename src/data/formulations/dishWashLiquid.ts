@@ -10,11 +10,11 @@ export const dishWashFormulation: FormulationData = {
   baseYield: 10.0,
   TotalQuantity: undefined,
   ingredients: [
-    { slNo: 1, particulars: "Slurry", uom: "KGS", qty: 0.8 },
+    { slNo: 1, particulars: "Acid Slurry", uom: "KGS", qty: 0.8 },
     { slNo: 2, particulars: "SLES", uom: "KGS", qty: 0.8 },
     { slNo: 3, particulars: "AOS", uom: "KGS", qty: 0.2 },
     { slNo: 4, particulars: "Perfume", uom: "LTR", qty: 0.03 },
-    { slNo: 5, particulars: "Colour", uom: "LTR", qty: 0.02 },
+    { slNo: 5, particulars: "Color", uom: "LTR", qty: 0.02 },
     { slNo: 6, particulars: "Caustic Soda", uom: "KGS", qty: 0.075 },
     { slNo: 7, particulars: "RO Water", uom: "LTR", qty: 8.5 },
     { slNo: 8, particulars: "Salt", uom: "KGS", qty: 0.14 },
@@ -29,7 +29,7 @@ export const dishWashFormulation: FormulationData = {
   costPer5LBottle: null,
   methodOfPreparation: [
     "Heat water to 40°C in main mixing vessel",
-    "Add slurry slowly while mixing",
+    "Add Acid Slurry slowly while mixing",
     "Add SLES gradually to avoid excessive foaming",
     "Add AOS for enhanced cleaning power",
     "Add caustic soda to maintain alkalinity",

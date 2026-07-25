@@ -5,9 +5,8 @@ import { productPricesData, packingMaterialsData, chemicalPrices } from "./prici
 // Map formulation "particulars" names to chemicalPrices "chemical" names
 // when they don't match exactly. Lookup is case-insensitive and trimmed.
 const chemicalAliasMap: Record<string, string> = {
-  "color": "Colour",
-  "colour": "Colour",
-  "acid slury": "Acid Slurry",
+  "color": "Color",
+  "acid slurry": "Acid Slurry",
   "soda ash": "Soda Ash (Sodium Carbonate)",
   "ss": "SS (Sodium Sulphate) - Global Salt",
   "sodium sulphate": "SS (Sodium Sulphate) - Global Salt",
@@ -15,7 +14,7 @@ const chemicalAliasMap: Record<string, string> = {
   "sles": "SLES (Sodium Lauryl Ether Sulfate)",
   "aos": "AOS (Alpha Olefin Sulphonate)",
   "bkc": "BKC (Benzalkonium Chloride)",
-  "aplhox": "Alphox 200",
+  "aplhox 200": "Alphox 200",
 };
 
 const resolveChemicalRate = (particulars: string): number | null => {
