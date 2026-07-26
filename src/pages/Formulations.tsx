@@ -363,6 +363,14 @@ const Formulations = () => {
           {/* Hero Section & Export Button (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
             <Button
+              onClick={previewPDF}
+              variant="secondary"
+              className="whitespace-nowrap"
+              title="Preview PDF in a new tab"
+            >
+              Preview PDF
+            </Button>
+            <Button
               onClick={exportToPDF}
               variant="outline"
               className="whitespace-nowrap"
