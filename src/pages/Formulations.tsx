@@ -90,18 +90,16 @@ const Formulations = () => {
     const pageW = 210;
     const pageH = 297;
     const marginX = 10;
+    const halfH = pageH / 2;
 
-    const drawHeader = () => {
+    const drawSlotHeader = (slotTop: number) => {
       if (logoDataUrl) {
-        try { doc.addImage(logoDataUrl, 'PNG', pageW / 2 - 15, 6, 30, 15); } catch {}
+        try { doc.addImage(logoDataUrl, 'PNG', pageW / 2 - 15, slotTop + 3, 30, 15); } catch {}
       }
       doc.setFontSize(8);
       doc.setFont(undefined, 'normal');
-      doc.text('FLAT NO - 202, RK RESIDENCY, HARITHA ROYAL CITY COLONY, RAVALKOLE, MEDCHAL - 501401', pageW / 2, 25, { align: 'center' });
+      doc.text('FLAT NO - 202, RK RESIDENCY, HARITHA ROYAL CITY COLONY, RAVALKOLE, MEDCHAL - 501401', pageW / 2, slotTop + 22, { align: 'center' });
     };
-
-    drawHeader();
-    let yPosition = 32;
 
     const allFormulationsData = formulations
       .filter(f => f.id <= 12)
@@ -113,15 +111,21 @@ const Formulations = () => {
 
     const TELUGU_COL = 2;
 
-    allFormulationsData.forEach((formulation) => {
-      const ingredientCount = formulation.ingredients?.length || 0;
-      const estBlockH = 5 + 6 + ingredientCount * 5 + 10 + 6;
-
-      if (yPosition + estBlockH > pageH - 8) {
+    allFormulationsData.forEach((formulation, index) => {
+      const slotIndex = index % 2;
+      if (index > 0 && slotIndex === 0) {
         doc.addPage();
-        drawHeader();
-        yPosition = 32;
       }
+      const slotTop = slotIndex === 0 ? 0 : halfH;
+
+      if (slotIndex === 1) {
+        doc.setDrawColor(180);
+        doc.setLineWidth(0.2);
+        doc.line(marginX, halfH, pageW - marginX, halfH);
+      }
+
+      drawSlotHeader(slotTop);
+      let yPosition = slotTop + 28;
 
       doc.setFontSize(11);
       doc.setFont(undefined, 'bold');
@@ -138,8 +142,6 @@ const Formulations = () => {
       const totalCostPer500MLBottle = costPer500ML + bottle500MLCost;
       const totalCostPer1LBottle = costPer1L + bottle1LCost;
 
-      // Keep Telugu text out of the cell body (jsPDF can't shape Indic).
-      // We draw it as an image in didDrawCell instead.
       const teluguByRow: string[] = [];
       const tableData = formulation.ingredients?.map((ing, idx) => {
         teluguByRow[idx] = getTelugu(ing.particulars) ?? '';
@@ -154,13 +156,15 @@ const Formulations = () => {
         ];
       }) || [];
 
+      const slotBottomLimit = slotTop + halfH - 4;
+
       autoTable(doc, {
         startY: yPosition,
         head: [['SL', 'PARTICULARS', 'PARTICULARS (TELUGU)', 'UOM', 'QTY', 'RATE', 'AMT']],
         body: tableData,
         theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 1.5, minCellHeight: 6 },
-        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 10 },
+        styles: { fontSize: 9, cellPadding: 1.2, minCellHeight: 5 },
+        headStyles: { fillColor: [31, 68, 182], textColor: 255, fontStyle: 'bold', fontSize: 9 },
         columnStyles: {
           0: { halign: 'center', cellWidth: 10 },
           1: { cellWidth: 55 },
@@ -170,7 +174,8 @@ const Formulations = () => {
           5: { halign: 'right', cellWidth: 17 },
           6: { halign: 'right', cellWidth: 18 }
         },
-        margin: { left: marginX, right: marginX },
+        margin: { left: marginX, right: marginX, bottom: pageH - slotBottomLimit },
+        pageBreak: 'avoid',
         didDrawCell: (data) => {
           if (data.section !== 'body' || data.column.index !== TELUGU_COL) return;
           const text = teluguByRow[data.row.index];
@@ -201,17 +206,16 @@ const Formulations = () => {
           ['Cost / 1 Ltr Bottle', costPer1L.toFixed(2), bottle1LCost.toFixed(2), totalCostPer1LBottle.toFixed(2)],
         ],
         theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 1.5 },
+        styles: { fontSize: 9, cellPadding: 1.2 },
         columnStyles: {
           0: { cellWidth: 65, fontStyle: 'bold' },
           1: { cellWidth: 55, halign: 'center', fontStyle: 'bold' },
           2: { cellWidth: 30, halign: 'center' },
           3: { cellWidth: 30, halign: 'right', fontStyle: 'bold' }
         },
-        margin: { left: marginX, right: marginX }
+        margin: { left: marginX, right: marginX, bottom: pageH - slotBottomLimit },
+        pageBreak: 'avoid',
       });
-
-      yPosition = (doc as any).lastAutoTable.finalY + 5;
     });
 
     doc.save('Formulations.pdf');
