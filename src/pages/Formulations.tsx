@@ -82,7 +82,7 @@ const Formulations = () => {
     navigate(`/formulation/${formulation.slug}`);
   };
 
-  const exportToPDF = async () => {
+  const buildPDF = async (): Promise<jsPDF> => {
     const doc = new jsPDF('p', 'mm', 'a4');
     await ensureTeluguBrowserFont();
     const logoDataUrl = await loadLogoDataUrl();
@@ -92,39 +92,74 @@ const Formulations = () => {
     const marginX = 8;
     const halfH = pageH / 2;
 
-    // Brand palette
-    const ACCENT: [number, number, number] = [31, 68, 182];       // brand blue
-    const ACCENT_SOFT: [number, number, number] = [235, 240, 255];
-    const INK: [number, number, number] = [30, 41, 59];           // slate-800
-    const MUTED: [number, number, number] = [100, 116, 139];      // slate-500
-    const FINAL: [number, number, number] = [200, 30, 30];        // red accent
-    const SELL: [number, number, number] = [22, 128, 60];         // green accent
+    // Brand palette — refined for the card-framed halves
+    const ACCENT: [number, number, number] = [31, 68, 182];
+    const ACCENT_SOFT: [number, number, number] = [239, 244, 255];
+    const INK: [number, number, number] = [30, 41, 59];
+    const MUTED: [number, number, number] = [100, 116, 139];
+    const LINE: [number, number, number] = [225, 231, 240];
+    const ZEBRA: [number, number, number] = [249, 251, 254];
+    const FINAL: [number, number, number] = [200, 30, 30];
+    const SELL: [number, number, number] = [22, 128, 60];
+
+    const ADDRESS = 'Flat No. 202, RK Residency, Haritha Royal City Colony, Ravalkole, Medchal - 501401';
 
     const drawSlotHeader = (slotTop: number) => {
+      const headerH = 30;
+      const centerY = slotTop + headerH / 2;
+      // Logo — auto-scale keeping aspect ratio, height-capped
       if (logoDataUrl) {
-        try { doc.addImage(logoDataUrl, 'PNG', pageW / 2 - 18, slotTop + 4, 36, 18); } catch {}
+        try {
+          const props = (doc as any).getImageProperties(logoDataUrl);
+          const targetH = 16;
+          const ratio = props.width / props.height;
+          const targetW = Math.min(44, targetH * ratio);
+          const finalH = targetW / ratio;
+          doc.addImage(
+            logoDataUrl,
+            'PNG',
+            pageW / 2 - targetW / 2,
+            centerY - finalH / 2 - 2,
+            targetW,
+            finalH,
+          );
+        } catch {}
       }
       doc.setFont(undefined, 'normal');
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setTextColor(...MUTED);
-      doc.text(
-        'FLAT NO - 202, RK RESIDENCY, HARITHA ROYAL CITY COLONY, RAVALKOLE, MEDCHAL - 501401',
-        pageW / 2, slotTop + 27, { align: 'center' }
-      );
+      const lines = doc.splitTextToSize(ADDRESS, pageW - marginX * 2 - 8);
+      const startY = slotTop + headerH - 4 - (lines.length - 1) * 3.2;
+      lines.forEach((ln: string, i: number) => {
+        doc.text(ln, pageW / 2, startY + i * 3.4, { align: 'center' });
+      });
       doc.setTextColor(...INK);
     };
 
-    const allFormulationsData = formulations
+    const formatINR = (n: number) =>
+      `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // Enrich + sort into Big/Small pairs so summary panel never overlaps table
+    const enriched = formulations
       .filter(f => f.id <= 12)
       .map(f => {
         const formData = getFormulationBySlug(f.slug);
         return formData ? { ...f, ...formData } : null;
       })
-      .filter(Boolean);
+      .filter(Boolean) as any[];
+
+    const BIG_THRESHOLD = 8;
+    const bigs = enriched.filter(f => (f.ingredients?.length ?? 0) >= BIG_THRESHOLD);
+    const smalls = enriched.filter(f => (f.ingredients?.length ?? 0) < BIG_THRESHOLD);
+    const ordered: any[] = [];
+    while (bigs.length || smalls.length) {
+      if (bigs.length) ordered.push(bigs.shift());
+      if (smalls.length) ordered.push(smalls.shift());
+    }
 
     const TELUGU_COL = 2;
 
-    allFormulationsData.forEach((formulation, index) => {
+    ordered.forEach((formulation, index) => {
       const slotIndex = index % 2;
       if (index > 0 && slotIndex === 0) {
         doc.addPage();
@@ -137,8 +172,15 @@ const Formulations = () => {
       const frameW = pageW - marginX * 2;
       const frameH = halfH - 6;
       doc.setDrawColor(...ACCENT);
-      doc.setLineWidth(0.6);
+      doc.setLineWidth(0.5);
       doc.roundedRect(frameX, frameY, frameW, frameH, 3, 3);
+
+      // Half-page divider between the two slots
+      if (slotIndex === 1) {
+        doc.setDrawColor(...LINE);
+        doc.setLineWidth(0.2);
+        doc.line(marginX + 4, halfH, pageW - marginX - 4, halfH);
+      }
 
       drawSlotHeader(slotTop);
 
@@ -150,12 +192,12 @@ const Formulations = () => {
       doc.setFont(undefined, 'bold');
       doc.setFontSize(14);
       doc.setTextColor(255, 255, 255);
-      doc.text(formulation.name.toUpperCase(), pageW / 2, titleBarY + titleBarH / 2 + 1.6, { align: 'center' });
+      doc.text(formulation.name.toUpperCase(), pageW / 2, titleBarY + titleBarH / 2 + 1.8, { align: 'center' });
       doc.setTextColor(...INK);
 
       let yPosition = titleBarY + titleBarH + 3;
 
-      const totalCost = formulation.ingredients?.reduce((sum, ing) => sum + parseFloat(ing.amount.toFixed(2)), 0) || 0;
+      const totalCost = formulation.ingredients?.reduce((sum: number, ing: any) => sum + parseFloat(ing.amount.toFixed(2)), 0) || 0;
       const baseYield = formulation.baseYield || 10;
       const costPerLiter = totalCost / baseYield;
       const costPer500ML = costPerLiter * 0.5;
@@ -166,7 +208,7 @@ const Formulations = () => {
       const totalCostPer1LBottle = costPer1L + bottle1LCost;
 
       const teluguByRow: string[] = [];
-      const tableData = formulation.ingredients?.map((ing, idx) => {
+      const tableData = formulation.ingredients?.map((ing: any, idx: number) => {
         teluguByRow[idx] = getTelugu(ing.particulars) ?? '';
         return [
           ing.slNo,
@@ -179,16 +221,36 @@ const Formulations = () => {
         ];
       }) || [];
 
+      // Reserve summary space so table auto-shrinks/aligns cleanly
+      const summaryRows = 6;
+      const summaryRowH = 6.2;
+      const summaryH = summaryRows * summaryRowH + 10; // includes header bar + padding
       const slotBottomLimit = slotTop + halfH - 6;
+      const tableBottomLimit = slotBottomLimit - summaryH - 3;
 
       autoTable(doc, {
         startY: yPosition,
         head: [['SL', 'PARTICULARS', 'PARTICULARS (TELUGU)', 'UOM', 'QTY', 'RATE', 'AMT']],
         body: tableData,
         theme: 'grid',
-        styles: { fontSize: 10.5, cellPadding: 2, minCellHeight: 7, textColor: INK, lineColor: [220, 226, 235] },
-        headStyles: { fillColor: ACCENT, textColor: 255, fontStyle: 'bold', fontSize: 10.5, halign: 'center' },
-        alternateRowStyles: { fillColor: [248, 250, 253] },
+        styles: {
+          fontSize: 10,
+          cellPadding: { top: 1.8, right: 2.4, bottom: 1.8, left: 2.4 },
+          minCellHeight: 6.6,
+          textColor: INK,
+          lineColor: LINE,
+          lineWidth: 0.15,
+          valign: 'middle',
+        },
+        headStyles: {
+          fillColor: ACCENT,
+          textColor: 255,
+          fontStyle: 'bold',
+          fontSize: 10,
+          halign: 'center',
+          cellPadding: { top: 2.2, right: 2.4, bottom: 2.2, left: 2.4 },
+        },
+        alternateRowStyles: { fillColor: ZEBRA },
         columnStyles: {
           0: { halign: 'center', cellWidth: 10 },
           1: { cellWidth: 55, fontStyle: 'bold' },
@@ -198,7 +260,7 @@ const Formulations = () => {
           5: { halign: 'right', cellWidth: 17 },
           6: { halign: 'right', cellWidth: 20, fontStyle: 'bold' }
         },
-        margin: { left: marginX + 2, right: marginX + 2, bottom: pageH - slotBottomLimit },
+        margin: { left: marginX + 2, right: marginX + 2, bottom: pageH - tableBottomLimit },
         pageBreak: 'avoid',
         didDrawCell: (data) => {
           if (data.section !== 'body' || data.column.index !== TELUGU_COL) return;
@@ -207,8 +269,8 @@ const Formulations = () => {
           const img = renderTeluguToPng(text, 44, true);
           if (!img) return;
           const cell = data.cell;
-          const padX = 1.5;
-          const padY = 0.5;
+          const padX = 1.8;
+          const padY = 0.8;
           const maxW = cell.width - padX * 2;
           const maxH = cell.height - padY * 2;
           const ratio = img.width / img.height;
@@ -221,42 +283,70 @@ const Formulations = () => {
         }
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 3;
-
-      // Elegant cost summary — right-aligned key/value block like reference
-      const summaryW = 90;
+      // Cost summary — panel with header bar + emphasised grand totals
+      const summaryW = 96;
       const summaryX = pageW - marginX - 2 - summaryW;
-      const rowH = 6.5;
-      const rows: Array<{ label: string; value: string; color?: [number, number, number]; bold?: boolean }> = [
-        { label: 'Cost / 500 ML (liquid)', value: `Rs. ${costPer500ML.toFixed(2)}` },
-        { label: 'Bottle 500 ML', value: `Rs. ${bottle500MLCost.toFixed(2)}` },
-        { label: 'Total / 500 ML Bottle', value: `Rs. ${totalCostPer500MLBottle.toFixed(2)}`, color: FINAL, bold: true },
-        { label: 'Cost / 1 Ltr (liquid)', value: `Rs. ${costPer1L.toFixed(2)}` },
-        { label: 'Bottle 1 Ltr', value: `Rs. ${bottle1LCost.toFixed(2)}` },
-        { label: 'Total / 1 Ltr Bottle', value: `Rs. ${totalCostPer1LBottle.toFixed(2)}`, color: SELL, bold: true },
+      const summaryY = slotBottomLimit - summaryH;
+
+      // Panel background + border
+      doc.setFillColor(...ACCENT_SOFT);
+      doc.setDrawColor(...LINE);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(summaryX, summaryY, summaryW, summaryH, 2, 2, 'FD');
+
+      // Panel header bar
+      doc.setFillColor(...ACCENT);
+      doc.roundedRect(summaryX, summaryY, summaryW, 6, 2, 2, 'F');
+      doc.rect(summaryX, summaryY + 3, summaryW, 3, 'F');
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.text('COST SUMMARY', summaryX + summaryW / 2, summaryY + 4.2, { align: 'center' });
+      doc.setTextColor(...INK);
+
+      const rows: Array<{ label: string; value: string; color?: [number, number, number]; grand?: boolean }> = [
+        { label: 'Cost / 500 ML (liquid)', value: formatINR(costPer500ML) },
+        { label: 'Bottle 500 ML', value: formatINR(bottle500MLCost) },
+        { label: 'Total / 500 ML Bottle', value: formatINR(totalCostPer500MLBottle), color: FINAL, grand: true },
+        { label: 'Cost / 1 Ltr (liquid)', value: formatINR(costPer1L) },
+        { label: 'Bottle 1 Ltr', value: formatINR(bottle1LCost) },
+        { label: 'Total / 1 Ltr Bottle', value: formatINR(totalCostPer1LBottle), color: SELL, grand: true },
       ];
 
-      // Ensure we fit inside the slot
-      const summaryH = rows.length * rowH + 2;
-      if (yPosition + summaryH > slotBottomLimit) {
-        yPosition = slotBottomLimit - summaryH;
-      }
-
-      // subtle background panel
-      doc.setFillColor(...ACCENT_SOFT);
-      doc.roundedRect(summaryX - 2, yPosition - 2, summaryW + 4, summaryH, 1.5, 1.5, 'F');
-
+      const rowsStartY = summaryY + 10;
       rows.forEach((r, i) => {
-        const y = yPosition + i * rowH + 4.5;
-        doc.setFontSize(10.5);
-        doc.setFont(undefined, r.bold ? 'bold' : 'normal');
+        const y = rowsStartY + i * summaryRowH;
+
+        // Highlight bar for grand totals
+        if (r.grand) {
+          doc.setFillColor(255, 255, 255);
+          doc.rect(summaryX + 1.2, y - 4.6, summaryW - 2.4, summaryRowH - 0.6, 'F');
+          doc.setDrawColor(...LINE);
+          doc.setLineWidth(0.15);
+          doc.line(summaryX + 3, y - 4.6, summaryX + summaryW - 3, y - 4.6);
+        }
+
+        doc.setFontSize(r.grand ? 10.5 : 9.5);
+        doc.setFont(undefined, r.grand ? 'bold' : 'normal');
+        doc.setTextColor(...(r.color ?? (r.grand ? INK : MUTED)));
+        doc.text(r.label + ':', summaryX + 3, y);
         doc.setTextColor(...(r.color ?? INK));
-        doc.text(r.label + ':', summaryX, y);
-        doc.text(r.value, summaryX + summaryW, y, { align: 'right' });
+        doc.text(r.value, summaryX + summaryW - 3, y, { align: 'right' });
       });
       doc.setTextColor(...INK);
     });
 
+    return doc;
+  };
+
+  const previewPDF = async () => {
+    const doc = await buildPDF();
+    const url = doc.output('bloburl');
+    window.open(url, '_blank');
+  };
+
+  const exportToPDF = async () => {
+    const doc = await buildPDF();
     doc.save('Formulations.pdf');
   };
 
@@ -272,6 +362,14 @@ const Formulations = () => {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section & Export Button (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
+            <Button
+              onClick={previewPDF}
+              variant="secondary"
+              className="whitespace-nowrap"
+              title="Preview PDF in a new tab"
+            >
+              Preview PDF
+            </Button>
             <Button
               onClick={exportToPDF}
               variant="outline"
