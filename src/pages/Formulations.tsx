@@ -221,30 +221,15 @@ const Formulations = () => {
         ];
       }) || [];
 
-      // Reserve summary space so table auto-shrinks/aligns cleanly
-      const summaryRows = 6;
-      const summaryRowH = 6.2;
-      const summaryH = summaryRows * summaryRowH + 10;
+      // Horizontal summary panel: two rows (headers + values), full frame width
+      const summaryH = 14;
       const slotBottomLimit = slotTop + halfH - 6;
       const tableBottomLimit = slotBottomLimit - summaryH - 3;
 
-      // Dynamically scale row height / font size so all ingredients fit in the slot
-      const availableTableH = tableBottomLimit - yPosition;
-      const rowCount = tableData.length;
-      const headerRowH = 9;
-      const idealRowH = 6.6;
-      const idealFont = 10;
-      let rowH = idealRowH;
-      let fontSize = idealFont;
-      let padY = 1.8;
-      if (rowCount > 0) {
-        const neededPerRow = (availableTableH - headerRowH) / rowCount;
-        if (neededPerRow < idealRowH) {
-          rowH = Math.max(3.8, neededPerRow);
-          fontSize = Math.max(6.5, Math.min(idealFont, rowH * 1.3));
-          padY = Math.max(0.3, (rowH - fontSize * 0.5) / 2);
-        }
-      }
+      // Fixed, consistent typography across all formulations
+      const fontSize = 9;
+      const rowH = 5.2;
+      const padY = 1.2;
 
       autoTable(doc, {
         startY: yPosition,
@@ -265,9 +250,9 @@ const Formulations = () => {
           fillColor: ACCENT,
           textColor: 255,
           fontStyle: 'bold',
-          fontSize: Math.min(10, fontSize + 0.5),
+          fontSize: 9.5,
           halign: 'center',
-          cellPadding: { top: 2.2, right: 2.4, bottom: 2.2, left: 2.4 },
+          cellPadding: { top: 2, right: 2.4, bottom: 2, left: 2.4 },
         },
         alternateRowStyles: { fillColor: ZEBRA },
         columnStyles: {
@@ -303,55 +288,54 @@ const Formulations = () => {
         }
       });
 
-      // Cost summary — panel with header bar + emphasised grand totals
-      const summaryW = 96;
-      const summaryX = pageW - marginX - 2 - summaryW;
+      // Horizontal cost summary — full-width table with headers on top, values below
+      const summaryX = frameX + 2;
+      const summaryW = frameW - 4;
       const summaryY = slotBottomLimit - summaryH;
+      const headerH = 5.6;
+      const valueH = summaryH - headerH;
 
-      // Panel background + border
-      doc.setFillColor(...ACCENT_SOFT);
+      const cols = [
+        { label: 'Cost / 500 ML', value: formatINR(costPer500ML), color: INK },
+        { label: 'Bottle 500 ML', value: formatINR(bottle500MLCost), color: INK },
+        { label: 'Total / 500 ML', value: formatINR(totalCostPer500MLBottle), color: FINAL },
+        { label: 'Cost / 1 Ltr', value: formatINR(costPer1L), color: INK },
+        { label: 'Bottle 1 Ltr', value: formatINR(bottle1LCost), color: INK },
+        { label: 'Total / 1 Ltr', value: formatINR(totalCostPer1LBottle), color: SELL },
+      ];
+      const colW = summaryW / cols.length;
+
+      // Outer panel border
       doc.setDrawColor(...LINE);
       doc.setLineWidth(0.2);
-      doc.roundedRect(summaryX, summaryY, summaryW, summaryH, 2, 2, 'FD');
+      doc.roundedRect(summaryX, summaryY, summaryW, summaryH, 1.5, 1.5, 'S');
 
-      // Panel header bar
+      // Header bar
       doc.setFillColor(...ACCENT);
-      doc.roundedRect(summaryX, summaryY, summaryW, 6, 2, 2, 'F');
-      doc.rect(summaryX, summaryY + 3, summaryW, 3, 'F');
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(255, 255, 255);
-      doc.text('COST SUMMARY', summaryX + summaryW / 2, summaryY + 4.2, { align: 'center' });
-      doc.setTextColor(...INK);
+      doc.rect(summaryX, summaryY, summaryW, headerH, 'F');
+      // Values row background
+      doc.setFillColor(...ACCENT_SOFT);
+      doc.rect(summaryX, summaryY + headerH, summaryW, valueH, 'F');
 
-      const rows: Array<{ label: string; value: string; color?: [number, number, number]; grand?: boolean }> = [
-        { label: 'Cost / 500 ML (liquid)', value: formatINR(costPer500ML) },
-        { label: 'Bottle 500 ML', value: formatINR(bottle500MLCost) },
-        { label: 'Total / 500 ML Bottle', value: formatINR(totalCostPer500MLBottle), color: FINAL, grand: true },
-        { label: 'Cost / 1 Ltr (liquid)', value: formatINR(costPer1L) },
-        { label: 'Bottle 1 Ltr', value: formatINR(bottle1LCost) },
-        { label: 'Total / 1 Ltr Bottle', value: formatINR(totalCostPer1LBottle), color: SELL, grand: true },
-      ];
-
-      const rowsStartY = summaryY + 10;
-      rows.forEach((r, i) => {
-        const y = rowsStartY + i * summaryRowH;
-
-        // Highlight bar for grand totals
-        if (r.grand) {
-          doc.setFillColor(255, 255, 255);
-          doc.rect(summaryX + 1.2, y - 4.6, summaryW - 2.4, summaryRowH - 0.6, 'F');
+      cols.forEach((c, i) => {
+        const cx = summaryX + colW * i;
+        // Column divider
+        if (i > 0) {
           doc.setDrawColor(...LINE);
           doc.setLineWidth(0.15);
-          doc.line(summaryX + 3, y - 4.6, summaryX + summaryW - 3, y - 4.6);
+          doc.line(cx, summaryY, cx, summaryY + summaryH);
         }
-
-        doc.setFontSize(r.grand ? 10.5 : 9.5);
-        doc.setFont(undefined, r.grand ? 'bold' : 'normal');
-        doc.setTextColor(...(r.color ?? (r.grand ? INK : MUTED)));
-        doc.text(r.label + ':', summaryX + 3, y);
-        doc.setTextColor(...(r.color ?? INK));
-        doc.text(r.value, summaryX + summaryW - 3, y, { align: 'right' });
+        // Header text
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(7.8);
+        doc.setTextColor(255, 255, 255);
+        doc.text(c.label, cx + colW / 2, summaryY + headerH / 2 + 1.4, { align: 'center' });
+        // Value text
+        const isGrand = c.color === FINAL || c.color === SELL;
+        doc.setFont(undefined, isGrand ? 'bold' : 'normal');
+        doc.setFontSize(isGrand ? 10 : 9);
+        doc.setTextColor(...c.color);
+        doc.text(c.value, cx + colW / 2, summaryY + headerH + valueH / 2 + 1.6, { align: 'center' });
       });
       doc.setTextColor(...INK);
     });
