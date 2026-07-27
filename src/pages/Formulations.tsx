@@ -359,12 +359,6 @@ const Formulations = () => {
     return doc;
   };
 
-  const previewPDF = async () => {
-    const doc = await buildPDF();
-    const url = doc.output('bloburl');
-    window.open(url, '_blank');
-  };
-
   const exportToPDF = async () => {
     const doc = await buildPDF();
     doc.save('Formulations.pdf');
