@@ -224,9 +224,27 @@ const Formulations = () => {
       // Reserve summary space so table auto-shrinks/aligns cleanly
       const summaryRows = 6;
       const summaryRowH = 6.2;
-      const summaryH = summaryRows * summaryRowH + 10; // includes header bar + padding
+      const summaryH = summaryRows * summaryRowH + 10;
       const slotBottomLimit = slotTop + halfH - 6;
       const tableBottomLimit = slotBottomLimit - summaryH - 3;
+
+      // Dynamically scale row height / font size so all ingredients fit in the slot
+      const availableTableH = tableBottomLimit - yPosition;
+      const rowCount = tableData.length;
+      const headerRowH = 9;
+      const idealRowH = 6.6;
+      const idealFont = 10;
+      let rowH = idealRowH;
+      let fontSize = idealFont;
+      let padY = 1.8;
+      if (rowCount > 0) {
+        const neededPerRow = (availableTableH - headerRowH) / rowCount;
+        if (neededPerRow < idealRowH) {
+          rowH = Math.max(3.8, neededPerRow);
+          fontSize = Math.max(6.5, Math.min(idealFont, rowH * 1.3));
+          padY = Math.max(0.3, (rowH - fontSize * 0.5) / 2);
+        }
+      }
 
       autoTable(doc, {
         startY: yPosition,
@@ -234,19 +252,20 @@ const Formulations = () => {
         body: tableData,
         theme: 'grid',
         styles: {
-          fontSize: 10,
-          cellPadding: { top: 1.8, right: 2.4, bottom: 1.8, left: 2.4 },
-          minCellHeight: 6.6,
+          fontSize,
+          cellPadding: { top: padY, right: 2.4, bottom: padY, left: 2.4 },
+          minCellHeight: rowH,
           textColor: INK,
           lineColor: LINE,
           lineWidth: 0.15,
           valign: 'middle',
+          overflow: 'linebreak',
         },
         headStyles: {
           fillColor: ACCENT,
           textColor: 255,
           fontStyle: 'bold',
-          fontSize: 10,
+          fontSize: Math.min(10, fontSize + 0.5),
           halign: 'center',
           cellPadding: { top: 2.2, right: 2.4, bottom: 2.2, left: 2.4 },
         },
@@ -260,8 +279,9 @@ const Formulations = () => {
           5: { halign: 'right', cellWidth: 17 },
           6: { halign: 'right', cellWidth: 20, fontStyle: 'bold' }
         },
-        margin: { left: marginX + 2, right: marginX + 2, bottom: pageH - tableBottomLimit },
+        margin: { left: marginX + 2, right: marginX + 2, top: yPosition, bottom: pageH - tableBottomLimit },
         pageBreak: 'avoid',
+        rowPageBreak: 'avoid',
         didDrawCell: (data) => {
           if (data.section !== 'body' || data.column.index !== TELUGU_COL) return;
           const text = teluguByRow[data.row.index];
@@ -270,9 +290,9 @@ const Formulations = () => {
           if (!img) return;
           const cell = data.cell;
           const padX = 1.8;
-          const padY = 0.8;
+          const padYImg = 0.6;
           const maxW = cell.width - padX * 2;
-          const maxH = cell.height - padY * 2;
+          const maxH = cell.height - padYImg * 2;
           const ratio = img.width / img.height;
           let h = maxH;
           let w = h * ratio;
