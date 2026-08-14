@@ -4,20 +4,20 @@ export interface Ingredient {
   particulars: string;
   uom: string;
   qty: number;
-  // rate & amount are resolved dynamically from chemicalPrices at read time.
+  // rate & amount are resolved dynamically from chemical prices at read time.
   rate?: number;
   amount?: number;
 }
 
 export interface FormulationData {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   category: string;
   description: string;
   ingredients: Ingredient[];
   baseYield: number; // Base yield for the formulation
-  TotalQuantity?: number; // Optional manual override for total quantity
+  TotalQuantity?: number | null; // Optional manual override for total quantity
   costPer500ML: number;
   costPer1L: number;
   costPer5L: number;
@@ -28,18 +28,25 @@ export interface FormulationData {
 }
 
 export interface PricingData {
-  id: number;
+  id: string;
   product: string;
-  uom?: string;
-  minimumOrder?: number;
+  uom?: string | null;
+  minimumOrder?: number | null;
   retailPrice: number;
-  bulkPrice5Ltr?: number;
-  bulkPrice100Gms?: number;
+  bulkPrice5Ltr?: number | null;
+  bulkPrice100Gms?: number | null;
 }
 
 export interface PackingData {
-  id: number;
+  id: string;
   product: string;
   minimumOrder: number;
   retailPrice: number;
+}
+
+export interface ChemicalData {
+  id: string;
+  chemical: string;
+  rate: number;
+  uom: string;
 }
