@@ -1,26 +1,15 @@
+import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Beaker, 
-  Droplets, 
-  Sparkles, 
-  SprayCanIcon, 
-  Home, 
-  Utensils, 
-  Shirt, 
-  Bath, 
-  Shield, 
-  Leaf, 
-  FlaskConical, 
-  DollarSign,
-  Package,
-  Calculator,
-  FileDown
-} from "lucide-react";
+import { Beaker, Plus, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getFormulationBySlug } from "@/data/formulations";
+import FormulationModal from "@/components/FormulationModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFormulations, useDeleteRow } from "@/hooks/useCloudData";
+import type { FormulationData } from "@/data/types";
 import { getTelugu } from "@/data/teluguTranslations";
 import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 import jsPDF from 'jspdf';
@@ -42,45 +31,27 @@ const loadLogoDataUrl = async (): Promise<string | null> => {
 
 const Formulations = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data, isLoading } = useFormulations();
+  const removeFormulation = useDeleteRow("formulations");
 
-  const formulations = [
-    { id: 1, name: "Phenyl", slug: "phenyl", icon: Droplets, color: "bg-blue-500", description: "Disinfecting floor cleaner" },
-    { id: 2, name: "Dish Wash Liquid", slug: "dish-wash-liquid", icon: Utensils, color: "bg-green-500", description: "Grease cutting formula" },
-    { id: 3, name: "Copper Cleaning Liquid", slug: "copper-cleaning-liquid", icon: Sparkles, color: "bg-amber-500", description: "Metal surface cleaner" },
-    { id: 4, name: "Toilet Cleaner", slug: "toilet-cleaner", icon: Bath, color: "bg-cyan-500", description: "Bathroom disinfectant" },
-    { id: 5, name: "Acid", slug: "acid", icon: FlaskConical, color: "bg-red-500", description: "Industrial strength acid" },
-    { id: 6, name: "Hand Wash Liquid", slug: "hand-wash-liquid", icon: SprayCanIcon, color: "bg-purple-500", description: "Gentle hand cleanser" },
-    { id: 7, name: "Liquid Detergent", slug: "liquid-detergent", icon: Droplets, color: "bg-teal-500", description: "Liquid laundry formula" },
-    { id: 8, name: "Floor Cleaning Liquid", slug: "floor-cleaning-liquid", icon: Home, color: "bg-slate-600", description: "All floor types cleaner" },
-    { id: 9, name: "Detergent Powder", slug: "detergent-powder", icon: Shirt, color: "bg-indigo-500", description: "Laundry washing powder" },    
-    { id: 10, name: "Rose Water", slug: "rose-water", icon: Leaf, color: "bg-pink-500", description: "Natural rose essence" },
-    { id: 11, name: "Pain Relief Balm", slug: "pain-relief-balm", icon: Shield, color: "bg-orange-500", description: "Zandu Balm formula" },
-    { id: 12, name: "White Petroleum Jelly", slug: "white-petroleum-jelly", icon: Beaker, color: "bg-gray-500", description: "Vaseline formula" },
-    { id: 13, name: "Product Prices", slug: "product-prices", icon: DollarSign, color: "bg-emerald-600", description: "View all product prices" },
-    { id: 14, name: "Packing Materials Cost", slug: "packing-materials", icon: Package, color: "bg-violet-600", description: "Bottle and packaging costs" },
-    { id: 15, name: "Chemical Prices", slug: "chemical-prices", icon: Calculator, color: "bg-lime-600", description: "Raw material pricing" }
-  ];
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<FormulationData | null>(null);
 
-  const handleFormulationClick = (formulation: typeof formulations[0]) => {
-    console.log(`Navigating to ${formulation.name} formulation`);
-    
-    // Handle special pages
-    if (formulation.id === 13) {
-      navigate('/product-prices');
-      return;
+  const formulations = useMemo(
+    () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [data]
+  );
+
+  const handleDelete = async (id: string) => {
+    try {
+      await removeFormulation.mutateAsync(id);
+      toast.success("Formulation removed");
+    } catch (e: any) {
+      toast.error(e.message ?? "Delete failed");
     }
-    if (formulation.id === 14) {
-      navigate('/packing-materials');
-      return;
-    }
-    if (formulation.id === 15) {
-      navigate('/chemical-prices');
-      return;
-    }
-    
-    // Regular formulation pages - now using slug instead of ID
-    navigate(`/formulation/${formulation.slug}`);
   };
+
 
   const buildPDF = async (): Promise<jsPDF> => {
     const doc = new jsPDF('p', 'mm', 'a4');
