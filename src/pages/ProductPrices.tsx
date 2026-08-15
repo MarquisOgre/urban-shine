@@ -1,16 +1,78 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { ArrowLeft } from "lucide-react";
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { productPricesData, packingMaterialsData, chemicalPrices } from "@/data/pricingData";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProductPrices, useUpsertRow, useDeleteRow } from "@/hooks/useCloudData";
+import type { PricingData } from "@/data/types";
+
+const empty = {
+  id: "",
+  product: "",
+  uom: "",
+  retailPrice: "",
+  bulkPrice5Ltr: "",
+  bulkPrice100Gms: "",
+};
 
 const ProductPrices = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: products = [], isLoading } = useProductPrices();
+  const upsert = useUpsertRow("product_prices");
+  const remove = useDeleteRow("product_prices");
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(empty);
+
+  const startAdd = () => { setForm(empty); setOpen(true); };
+  const startEdit = (p: PricingData) => {
+    setForm({
+      id: p.id,
+      product: p.product,
+      uom: p.uom ?? "",
+      retailPrice: String(p.retailPrice),
+      bulkPrice5Ltr: p.bulkPrice5Ltr == null ? "" : String(p.bulkPrice5Ltr),
+      bulkPrice100Gms: p.bulkPrice100Gms == null ? "" : String(p.bulkPrice100Gms),
+    });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (!form.product.trim()) return toast.error("Product name is required");
+    try {
+      await upsert.mutateAsync({
+        ...(form.id ? { id: form.id } : {}),
+        product: form.product.trim(),
+        uom: form.uom.trim() || null,
+        retail_price: Number(form.retailPrice) || 0,
+        bulk_price_5ltr: form.bulkPrice5Ltr === "" ? null : Number(form.bulkPrice5Ltr),
+        bulk_price_100gms: form.bulkPrice100Gms === "" ? null : Number(form.bulkPrice100Gms),
+      });
+      toast.success(form.id ? "Price updated" : "Product added");
+      setOpen(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Save failed");
+    }
+  };
+
+  const del = async (id: string) => {
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Product removed");
+    } catch (e: any) {
+      toast.error(e.message ?? "Delete failed");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -18,150 +80,110 @@ const ProductPrices = () => {
 
       <main className="py-8 px-6">
         <div className="max-w-[1900px] mx-auto">
-          {/* Header Section */}
-          <div className="relative mb-10">
-            <h1 className="text-3xl font-bold text-slate-800 text-center">
-              All Prices
-            </h1>
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-              <Button
-                variant="outline"
-                onClick={() => navigate("/")}
-                className="flex items-center"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+            <Button variant="outline" onClick={() => navigate("/")} className="flex items-center">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <h1 className="text-3xl font-bold text-slate-800">Product Prices</h1>
+            {user ? (
+              <Button onClick={startAdd} className="gap-2">
+                <Plus className="h-4 w-4" /> Add Product
               </Button>
-            </div>
+            ) : (
+              <div className="w-[150px]" />
+            )}
           </div>
 
-         {/* ===== Product Prices ===== */}
-          <h2 className="text-2xl font-bold text-slate-800 mb-6">
-            Product Prices
-          </h2>
-
-          <div className="max-w-[1800px] mx-auto px-8 mb-14">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
-              {productPricesData.map((product) => {
+          {isLoading ? (
+            <p className="text-center text-slate-500">Loading…</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+              {products.map((product) => {
                 const bulkPrice = product.bulkPrice100Gms ?? product.bulkPrice5Ltr;
-                const bulkLabel = product.bulkPrice100Gms
-                  ? "100Gms Bulk Price"
-                  : "5 Ltr Price Bulk";
+                const bulkLabel = product.bulkPrice100Gms ? "100 Gms Bulk" : "5 Ltr Bulk";
 
                 return (
                   <Card
                     key={product.id}
-                    className="w-full max-w-[520px] flex items-center bg-white rounded-2xl p-8 transition-all hover:shadow-xl"
-                    style={{
-                      boxShadow:
-                        "inset 6px 0 0 0 #1F44B6, 0 4px 12px rgba(0,0,0,0.08)",
-                    }}
+                    className="w-full max-w-[560px] flex items-center bg-white rounded-2xl p-6 transition-all hover:shadow-xl"
+                    style={{ boxShadow: "inset 6px 0 0 0 #1F44B6, 0 4px 12px rgba(0,0,0,0.08)" }}
                   >
-                    {/* Product Name */}
-                    <div className="flex-1">
-                      <span className="font-semibold text-slate-800 text-lg">
-                        {product.product}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-slate-800 text-lg">{product.product}</span>
                     </div>
 
-                    {/* Right Side Columns */}
-                    <div className="flex items-center gap-10 ml-auto">
+                    <div className="flex items-center gap-6 ml-auto">
                       <div className="text-center">
                         <div className="text-xs text-slate-500">UOM</div>
-                        <div className="font-medium text-slate-700 text-sm">
-                          {product.uom}
-                        </div>
+                        <div className="font-medium text-slate-700 text-sm">{product.uom ?? "-"}</div>
                       </div>
-
                       <div className="text-center">
-                        <div className="text-xs text-slate-500">Retail Price</div>
-                        <div className="font-bold text-yellow-700 text-lg">
-                          ₹ {product.retailPrice}
-                        </div>
+                        <div className="text-xs text-slate-500">Retail</div>
+                        <div className="font-bold text-yellow-700 text-lg">₹ {product.retailPrice}</div>
                       </div>
-
                       <div className="text-center">
                         <div className="text-xs text-slate-500">{bulkLabel}</div>
                         <div className="font-bold text-green-700 text-lg">
-                          ₹ {bulkPrice}
+                          {bulkPrice == null ? "-" : `₹ ${bulkPrice}`}
                         </div>
                       </div>
+                      {user && (
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => startEdit(product)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => del(product.id)}>
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </Card>
                 );
               })}
             </div>
-          </div>
-
-
-          {/* ===== Packing Material Prices ===== */}
-          <h2 className="text-2xl font-bold text-slate-800 mb-6">
-            Packing Bottles Prices
-          </h2>
-
-          <div className="max-w-[1800px] mx-auto px-8 mb-14">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {packingMaterialsData.map((material) => (
-                <Card
-                  key={material.id}
-                  className="w-full max-w-[520px] p-4 flex items-center bg-white rounded-2xl transition-all hover:shadow-lg"
-                  style={{
-                    boxShadow:
-                      "inset 6px 0 0 0 #1F44B6, 0 4px 10px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <span className="font-semibold text-slate-800 truncate">
-                    {material.product}
-                  </span>
-
-                  <div className="flex items-center gap-8 ml-auto">
-                    <span className="text-slate-600 text-sm whitespace-nowrap">
-                      UOM: {material.minimumOrder}
-                    </span>
-                    <span className="font-bold text-yellow-700 text-lg whitespace-nowrap">
-                      ₹ {material.retailPrice}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-
-          {/* ===== Chemical Prices ===== */}
-          <h2 className="text-2xl font-bold text-slate-800 mb-6">
-            Chemical Prices
-          </h2>
-
-          <div className="max-w-[1800px] mx-auto px-8 mb-14">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-              {chemicalPrices.map((chemical) => (
-                <Card
-                  key={chemical.id}
-                  className="w-full max-w-[520px] p-4 flex items-center bg-white rounded-2xl transition-all hover:shadow-lg"
-                  style={{
-                    boxShadow:
-                      "inset 6px 0 0 0 #1F44B6, 0 4px 10px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <span className="font-semibold text-slate-800 truncate">
-                    {chemical.chemical}
-                  </span>
-
-                  <div className="flex items-center gap-8 ml-auto">
-                    <span className="text-slate-600 text-sm whitespace-nowrap">
-                      UOM: {chemical.uom}
-                    </span>
-                    <span className="font-bold text-yellow-700 text-lg whitespace-nowrap">
-                      ₹ {chemical.rate}
-                    </span>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-          </div>
+          )}
+        </div>
       </main>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? "Edit Product Price" : "Add Product Price"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Product</Label>
+                <Input value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} />
+              </div>
+              <div>
+                <Label>UOM</Label>
+                <Input placeholder="1 Ltr" value={form.uom} onChange={(e) => setForm({ ...form, uom: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Retail (₹)</Label>
+                <Input type="number" value={form.retailPrice} onChange={(e) => setForm({ ...form, retailPrice: e.target.value })} />
+              </div>
+              <div>
+                <Label>5 Ltr Bulk (₹)</Label>
+                <Input type="number" value={form.bulkPrice5Ltr} onChange={(e) => setForm({ ...form, bulkPrice5Ltr: e.target.value })} />
+              </div>
+              <div>
+                <Label>100 Gms Bulk (₹)</Label>
+                <Input type="number" value={form.bulkPrice100Gms} onChange={(e) => setForm({ ...form, bulkPrice100Gms: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={save}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
