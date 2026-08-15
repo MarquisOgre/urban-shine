@@ -110,14 +110,9 @@ const Formulations = () => {
     const formatINR = (n: number) =>
       `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    // Enrich + sort into Big/Small pairs so summary panel never overlaps table
-    const enriched = formulations
-      .filter(f => f.id <= 12)
-      .map(f => {
-        const formData = getFormulationBySlug(f.slug);
-        return formData ? { ...f, ...formData } : null;
-      })
-      .filter(Boolean) as any[];
+    // Sort into Big/Small pairs so summary panel never overlaps table
+    const enriched = formulations as any[];
+
 
     const BIG_THRESHOLD = 8;
     const bigs = enriched.filter(f => (f.ingredients?.length ?? 0) >= BIG_THRESHOLD);
