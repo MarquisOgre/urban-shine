@@ -324,8 +324,13 @@ const Formulations = () => {
       
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section & Export Button (Top Right)*/}
+          {/* Actions (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
+            {user && (
+              <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
+                <Plus className="h-4 w-4" /> Add Formulation
+              </Button>
+            )}
             <Button
               onClick={exportToPDF}
               variant="outline"
@@ -346,49 +351,52 @@ const Formulations = () => {
             </p>
           </div>
 
-          {/* Dashboard Grid - Changed from 3x5 to 5x3 */}
-          <div
-            id="formulations"
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10 max-h-[720px] overflow-y-auto pr-1"
-          >
-            {formulations.map((formulation) => {
-              const IconComponent = formulation.icon;
-              return (
+          {isLoading ? (
+            <p className="text-center text-slate-500">Loading formulations…</p>
+          ) : (
+            <div
+              id="formulations"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10"
+            >
+              {formulations.map((formulation) => (
                 <Card
                   key={formulation.id}
                   className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer border hover:border-blue-300"
-                  onClick={() => handleFormulationClick(formulation)}
+                  onClick={() => navigate(`/formulation/${formulation.slug}`)}
                 >
                   <CardContent className="p-3 sm:p-4 text-center">
-                    <div
-                      className={`${formulation.color} w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-105 transition-transform duration-300`}
-                    >
-                      <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <div className="bg-blue-600 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-105 transition-transform duration-300">
+                      <Beaker className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors text-sm">
                       {formulation.name}
                     </h3>
+                    {user && (
+                      <div className="flex justify-center gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => { setEditing(formulation); setModalOpen(true); }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(formulation.id)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">12+</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Product Formulations</p>
-            </Card>
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">15</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Dashboard Categories</p>
-            </Card>
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">99.9%</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Efficacy Rate</p>
-            </Card>
-          </div>
+          <FormulationModal
+            open={modalOpen}
+            formulation={editing}
+            onClose={() => { setModalOpen(false); setEditing(null); }}
+          />
+
         </div>
       </main>
 
