@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getFormulationBySlug } from "@/data/formulations";
+import { useFormulationBySlug } from "@/hooks/useCloudData";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FormulationNotFound from "@/components/FormulationNotFound";
@@ -13,9 +13,23 @@ import { FormulationData } from "@/data/types";
 
 const FormulationDetail = () => {
   const { slug } = useParams();
-  const baseFormulation = getFormulationBySlug(slug || "");
+  const { formulation: baseFormulation, isLoading } = useFormulationBySlug(slug || "");
 
-  const [currentYield, setCurrentYield] = useState(baseFormulation?.baseYield || 10);
+  const [currentYield, setCurrentYield] = useState(10);
+
+  useEffect(() => {
+    if (baseFormulation) setCurrentYield(baseFormulation.baseYield);
+  }, [baseFormulation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <Header />
+        <p className="text-center text-slate-500 py-20">Loading formulation…</p>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!baseFormulation) {
     return (
@@ -26,6 +40,7 @@ const FormulationDetail = () => {
       </div>
     );
   }
+
 
   const getScaledFormulation = (): FormulationData => {
     const scaleFactor = currentYield / baseFormulation.baseYield;

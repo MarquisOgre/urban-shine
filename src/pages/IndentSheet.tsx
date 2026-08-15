@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formulationsData, getFormulationById } from "@/data/formulations";
+import { useFormulations } from "@/hooks/useCloudData";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, FileDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,7 @@ import { getTelugu } from "@/data/teluguTranslations";
 import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 
 interface QuantityInput {
-  [formulationId: number]: number;
+  [formulationId: string]: number;
 }
 
 interface AggregatedIngredient {
@@ -36,11 +36,12 @@ const formatNumber = (num: number): string => {
 };
 
 const IndentSheet = () => {
+  const { data: formulationsData = [] } = useFormulations();
   const [quantities, setQuantities] = useState<QuantityInput>({});
   const [selectedMonth, setSelectedMonth] = useState<Date>(new Date());
   const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  const handleQuantityChange = (formulationId: number, value: string) => {
+  const handleQuantityChange = (formulationId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
     setQuantities((prev) => ({
       ...prev,
@@ -54,7 +55,7 @@ const IndentSheet = () => {
     Object.entries(quantities).forEach(([formulationId, qtyRequired]) => {
       if (qtyRequired <= 0) return;
 
-      const formulation = getFormulationById(Number(formulationId));
+      const formulation = formulationsData.find((f) => f.id === formulationId);
       if (!formulation) return;
 
       const totalQuantity = formulation.TotalQuantity ?? formulation.baseYield;
@@ -83,7 +84,7 @@ const IndentSheet = () => {
     });
 
     return Array.from(ingredientMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
-  }, [quantities]);
+  }, [quantities, formulationsData]);
 
   const totalAmount = aggregatedIngredients.reduce((sum, ing) => sum + ing.totalAmount, 0);
 
@@ -115,7 +116,7 @@ const IndentSheet = () => {
     const indentItems = Object.entries(quantities)
       .filter(([_, qty]) => qty > 0)
       .map(([formulationId, quantity]) => {
-        const formulation = formulationsData.find((f) => f.id === parseInt(formulationId));
+        const formulation = formulationsData.find((f) => f.id === formulationId);
         return formulation ? [formulation.name, quantity.toString()] : null;
       })
       .filter((item) => item !== null);
@@ -253,7 +254,7 @@ const IndentSheet = () => {
       lines.push("Indent Items");
       lines.push(["Product Name", "Quantity Required"].map(esc).join(","));
       indentItems.forEach(([id, qty]) => {
-        const f = formulationsData.find((x) => x.id === Number(id));
+        const f = formulationsData.find((x) => x.id === id);
         if (f) lines.push([esc(f.name), esc(qty)].join(","));
       });
       lines.push("");

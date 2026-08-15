@@ -1,13 +1,62 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { ArrowLeft, Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { chemicalPrices } from "@/data/pricingData";
+import { useAuth } from "@/contexts/AuthContext";
+import { useChemicalPrices, useUpsertRow, useDeleteRow } from "@/hooks/useCloudData";
+import type { ChemicalData } from "@/data/types";
+
+const empty = { id: "", chemical: "", rate: "", uom: "KG" };
 
 const ChemicalPrices = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data: chemicals = [], isLoading } = useChemicalPrices();
+  const upsert = useUpsertRow("chemical_prices");
+  const remove = useDeleteRow("chemical_prices");
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(empty);
+
+  const startAdd = () => { setForm(empty); setOpen(true); };
+  const startEdit = (c: ChemicalData) => {
+    setForm({ id: c.id, chemical: c.chemical, rate: String(c.rate), uom: c.uom });
+    setOpen(true);
+  };
+
+  const save = async () => {
+    if (!form.chemical.trim()) return toast.error("Chemical name is required");
+    try {
+      await upsert.mutateAsync({
+        ...(form.id ? { id: form.id } : {}),
+        chemical: form.chemical.trim(),
+        rate: Number(form.rate) || 0,
+        uom: form.uom.trim() || "KG",
+      });
+      toast.success(form.id ? "Chemical updated" : "Chemical added");
+      setOpen(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Save failed");
+    }
+  };
+
+  const del = async (id: string) => {
+    try {
+      await remove.mutateAsync(id);
+      toast.success("Chemical removed");
+    } catch (e: any) {
+      toast.error(e.message ?? "Delete failed");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -15,41 +64,78 @@ const ChemicalPrices = () => {
 
       <main className="py-8 px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
-          <div className="relative mb-10">
-            <h1 className="text-3xl font-bold text-slate-800 text-center">
-              Chemical Prices
-            </h1>
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/')}
-                className="flex items-center"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+            <Button variant="outline" onClick={() => navigate("/")} className="flex items-center">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <h1 className="text-3xl font-bold text-slate-800">Chemical Prices</h1>
+            {user ? (
+              <Button onClick={startAdd} className="gap-2">
+                <Plus className="h-4 w-4" /> Add Chemical
               </Button>
-            </div>
+            ) : (
+              <div className="w-[150px]" />
+            )}
           </div>
 
-          {/* Cards Grid - 3 per row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {chemicalPrices.map((chemical) => (
-              <Card
-                key={chemical.id}
-                className="p-4 flex items-center justify-between bg-white rounded-2xl transition-all hover:shadow-lg"
-                style={{
-                  boxShadow: "inset 6px 0 0 0 #1F44B6, 0 4px 10px rgba(0,0,0,0.08)",
-                }}
-              >
-                <span className="font-semibold text-slate-800 w-1/2 truncate">{chemical.chemical}</span>
-                <span className="text-slate-600 text-sm">UOM: {chemical.uom}</span>
-                <span className="font-bold text-yellow-700 text-lg whitespace-nowrap">₹ {chemical.rate}</span>
-              </Card>
-            ))}
-          </div>
+          {isLoading ? (
+            <p className="text-center text-slate-500">Loading…</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {chemicals.map((chemical) => (
+                <Card
+                  key={chemical.id}
+                  className="p-4 flex items-center justify-between gap-3 bg-white rounded-2xl transition-all hover:shadow-lg"
+                  style={{ boxShadow: "inset 6px 0 0 0 #1F44B6, 0 4px 10px rgba(0,0,0,0.08)" }}
+                >
+                  <span className="font-semibold text-slate-800 truncate flex-1">{chemical.chemical}</span>
+                  <span className="text-slate-600 text-sm whitespace-nowrap">UOM: {chemical.uom}</span>
+                  <span className="font-bold text-yellow-700 text-lg whitespace-nowrap">₹ {chemical.rate}</span>
+                  {user && (
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(chemical)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => del(chemical.id)}>
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </main>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? "Edit Chemical" : "Add Chemical"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Chemical Name</Label>
+              <Input value={form.chemical} onChange={(e) => setForm({ ...form, chemical: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Rate (₹)</Label>
+                <Input type="number" value={form.rate} onChange={(e) => setForm({ ...form, rate: e.target.value })} />
+              </div>
+              <div>
+                <Label>UOM</Label>
+                <Input value={form.uom} onChange={(e) => setForm({ ...form, uom: e.target.value })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={save}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

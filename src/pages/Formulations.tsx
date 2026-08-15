@@ -1,26 +1,15 @@
+import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Beaker, 
-  Droplets, 
-  Sparkles, 
-  SprayCanIcon, 
-  Home, 
-  Utensils, 
-  Shirt, 
-  Bath, 
-  Shield, 
-  Leaf, 
-  FlaskConical, 
-  DollarSign,
-  Package,
-  Calculator,
-  FileDown
-} from "lucide-react";
+import { Beaker, Plus, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getFormulationBySlug } from "@/data/formulations";
+import FormulationModal from "@/components/FormulationModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFormulations, useDeleteRow } from "@/hooks/useCloudData";
+import type { FormulationData } from "@/data/types";
 import { getTelugu } from "@/data/teluguTranslations";
 import { ensureTeluguBrowserFont, renderTeluguToPng } from "@/lib/teluguTextImage";
 import jsPDF from 'jspdf';
@@ -42,45 +31,27 @@ const loadLogoDataUrl = async (): Promise<string | null> => {
 
 const Formulations = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { data, isLoading } = useFormulations();
+  const removeFormulation = useDeleteRow("formulations");
 
-  const formulations = [
-    { id: 1, name: "Phenyl", slug: "phenyl", icon: Droplets, color: "bg-blue-500", description: "Disinfecting floor cleaner" },
-    { id: 2, name: "Dish Wash Liquid", slug: "dish-wash-liquid", icon: Utensils, color: "bg-green-500", description: "Grease cutting formula" },
-    { id: 3, name: "Copper Cleaning Liquid", slug: "copper-cleaning-liquid", icon: Sparkles, color: "bg-amber-500", description: "Metal surface cleaner" },
-    { id: 4, name: "Toilet Cleaner", slug: "toilet-cleaner", icon: Bath, color: "bg-cyan-500", description: "Bathroom disinfectant" },
-    { id: 5, name: "Acid", slug: "acid", icon: FlaskConical, color: "bg-red-500", description: "Industrial strength acid" },
-    { id: 6, name: "Hand Wash Liquid", slug: "hand-wash-liquid", icon: SprayCanIcon, color: "bg-purple-500", description: "Gentle hand cleanser" },
-    { id: 7, name: "Liquid Detergent", slug: "liquid-detergent", icon: Droplets, color: "bg-teal-500", description: "Liquid laundry formula" },
-    { id: 8, name: "Floor Cleaning Liquid", slug: "floor-cleaning-liquid", icon: Home, color: "bg-slate-600", description: "All floor types cleaner" },
-    { id: 9, name: "Detergent Powder", slug: "detergent-powder", icon: Shirt, color: "bg-indigo-500", description: "Laundry washing powder" },    
-    { id: 10, name: "Rose Water", slug: "rose-water", icon: Leaf, color: "bg-pink-500", description: "Natural rose essence" },
-    { id: 11, name: "Pain Relief Balm", slug: "pain-relief-balm", icon: Shield, color: "bg-orange-500", description: "Zandu Balm formula" },
-    { id: 12, name: "White Petroleum Jelly", slug: "white-petroleum-jelly", icon: Beaker, color: "bg-gray-500", description: "Vaseline formula" },
-    { id: 13, name: "Product Prices", slug: "product-prices", icon: DollarSign, color: "bg-emerald-600", description: "View all product prices" },
-    { id: 14, name: "Packing Materials Cost", slug: "packing-materials", icon: Package, color: "bg-violet-600", description: "Bottle and packaging costs" },
-    { id: 15, name: "Chemical Prices", slug: "chemical-prices", icon: Calculator, color: "bg-lime-600", description: "Raw material pricing" }
-  ];
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<FormulationData | null>(null);
 
-  const handleFormulationClick = (formulation: typeof formulations[0]) => {
-    console.log(`Navigating to ${formulation.name} formulation`);
-    
-    // Handle special pages
-    if (formulation.id === 13) {
-      navigate('/product-prices');
-      return;
+  const formulations = useMemo(
+    () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+    [data]
+  );
+
+  const handleDelete = async (id: string) => {
+    try {
+      await removeFormulation.mutateAsync(id);
+      toast.success("Formulation removed");
+    } catch (e: any) {
+      toast.error(e.message ?? "Delete failed");
     }
-    if (formulation.id === 14) {
-      navigate('/packing-materials');
-      return;
-    }
-    if (formulation.id === 15) {
-      navigate('/chemical-prices');
-      return;
-    }
-    
-    // Regular formulation pages - now using slug instead of ID
-    navigate(`/formulation/${formulation.slug}`);
   };
+
 
   const buildPDF = async (): Promise<jsPDF> => {
     const doc = new jsPDF('p', 'mm', 'a4');
@@ -139,14 +110,9 @@ const Formulations = () => {
     const formatINR = (n: number) =>
       `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    // Enrich + sort into Big/Small pairs so summary panel never overlaps table
-    const enriched = formulations
-      .filter(f => f.id <= 12)
-      .map(f => {
-        const formData = getFormulationBySlug(f.slug);
-        return formData ? { ...f, ...formData } : null;
-      })
-      .filter(Boolean) as any[];
+    // Sort into Big/Small pairs so summary panel never overlaps table
+    const enriched = formulations as any[];
+
 
     const BIG_THRESHOLD = 8;
     const bigs = enriched.filter(f => (f.ingredients?.length ?? 0) >= BIG_THRESHOLD);
@@ -358,8 +324,13 @@ const Formulations = () => {
       
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Hero Section & Export Button (Top Right)*/}
+          {/* Actions (Top Right)*/}
           <div className="flex justify-end gap-2 mb-6 sm:mb-8">
+            {user && (
+              <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
+                <Plus className="h-4 w-4" /> Add Formulation
+              </Button>
+            )}
             <Button
               onClick={exportToPDF}
               variant="outline"
@@ -380,49 +351,52 @@ const Formulations = () => {
             </p>
           </div>
 
-          {/* Dashboard Grid - Changed from 3x5 to 5x3 */}
-          <div
-            id="formulations"
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10 max-h-[720px] overflow-y-auto pr-1"
-          >
-            {formulations.map((formulation) => {
-              const IconComponent = formulation.icon;
-              return (
+          {isLoading ? (
+            <p className="text-center text-slate-500">Loading formulations…</p>
+          ) : (
+            <div
+              id="formulations"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10"
+            >
+              {formulations.map((formulation) => (
                 <Card
                   key={formulation.id}
                   className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer border hover:border-blue-300"
-                  onClick={() => handleFormulationClick(formulation)}
+                  onClick={() => navigate(`/formulation/${formulation.slug}`)}
                 >
                   <CardContent className="p-3 sm:p-4 text-center">
-                    <div
-                      className={`${formulation.color} w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-105 transition-transform duration-300`}
-                    >
-                      <IconComponent className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <div className="bg-blue-600 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:scale-105 transition-transform duration-300">
+                      <Beaker className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors text-sm">
                       {formulation.name}
                     </h3>
+                    {user && (
+                      <div className="flex justify-center gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => { setEditing(formulation); setModalOpen(true); }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(formulation.id)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">12+</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Product Formulations</p>
-            </Card>
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">15</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Dashboard Categories</p>
-            </Card>
-            <Card className="text-center p-4 sm:p-6 bg-white/70 backdrop-blur-sm">
-              <h3 className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">99.9%</h3>
-              <p className="text-slate-600 text-sm sm:text-base">Efficacy Rate</p>
-            </Card>
-          </div>
+          <FormulationModal
+            open={modalOpen}
+            formulation={editing}
+            onClose={() => { setModalOpen(false); setEditing(null); }}
+          />
+
         </div>
       </main>
 
