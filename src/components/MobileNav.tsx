@@ -13,9 +13,11 @@ const MobileNav = () => {
   const publicItems = [
     { to: "/formulations", label: "Formulations", icon: Beaker },
     { to: "/product-prices", label: "Product Prices", icon: ShoppingBag },
-    { to: "/prices", label: "Prices", icon: DollarSign },
+    { to: "/packing-materials", label: "Packing Materials", icon: DollarSign },
+    { to: "/chemical-prices", label: "Chemical Prices", icon: DollarSign },
     { to: "/indent-sheet", label: "Indent Sheet", icon: ClipboardList },
   ];
+
 
   const protectedItems = [
     { to: "/invoice", label: "Invoice System", icon: FileText },

@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { productPricesData } from "@/data/pricingData";
+import { useProductPrices } from "@/hooks/useCloudData";
 
 interface InvoiceModalProps {
   open: boolean;
@@ -46,7 +46,7 @@ const InvoiceModal = ({
     notes: "",
   });
 
-  const priceData = productPricesData;
+  const { data: priceData = [] } = useProductPrices();
 
   // Populate form if editing existing invoice
   useEffect(() => {
