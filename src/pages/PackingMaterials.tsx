@@ -91,22 +91,24 @@ const PackingMaterials = () => {
               {materials.map((material) => (
                 <Card
                   key={material.id}
-                  className="p-4 flex items-center justify-between gap-3 bg-white rounded-2xl transition-all hover:shadow-lg"
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-2xl transition-all hover:shadow-lg"
                   style={{ boxShadow: "inset 6px 0 0 0 #1F44B6, 0 4px 10px rgba(0,0,0,0.08)" }}
                 >
                   <span className="font-semibold text-slate-800 truncate flex-1">{material.product}</span>
-                  <span className="text-slate-600 text-sm whitespace-nowrap">MOQ: {material.minimumOrder}</span>
-                  <span className="font-bold text-yellow-700 text-lg whitespace-nowrap">₹ {material.retailPrice}</span>
-                  {user && (
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => startEdit(material)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => del(material.id)}>
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4">
+                    <span className="text-slate-600 text-sm whitespace-nowrap">MOQ: {material.minimumOrder}</span>
+                    <span className="font-bold text-yellow-700 text-base sm:text-lg whitespace-nowrap">₹ {material.retailPrice}</span>
+                    {user && (
+                      <div className="flex gap-1 ml-auto sm:ml-0">
+                        <Button variant="ghost" size="icon" onClick={() => startEdit(material)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => del(material.id)}>
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </Card>
               ))}
             </div>

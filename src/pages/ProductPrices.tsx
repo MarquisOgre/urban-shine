@@ -106,30 +106,30 @@ const ProductPrices = () => {
                 return (
                   <Card
                     key={product.id}
-                    className="w-full max-w-[560px] flex items-center bg-white rounded-2xl p-6 transition-all hover:shadow-xl"
+                    className="w-full max-w-[560px] flex flex-col sm:flex-row items-start sm:items-center bg-white rounded-2xl p-4 sm:p-6 transition-all hover:shadow-xl gap-4 sm:gap-6"
                     style={{ boxShadow: "inset 6px 0 0 0 #1F44B6, 0 4px 12px rgba(0,0,0,0.08)" }}
                   >
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-slate-800 text-lg">{product.product}</span>
+                      <span className="font-semibold text-slate-800 text-base sm:text-lg">{product.product}</span>
                     </div>
 
-                    <div className="flex items-center gap-6 ml-auto">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6 w-full sm:w-auto">
                       <div className="text-center">
                         <div className="text-xs text-slate-500">UOM</div>
                         <div className="font-medium text-slate-700 text-sm">{product.uom ?? "-"}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-slate-500">Retail</div>
-                        <div className="font-bold text-yellow-700 text-lg">₹ {product.retailPrice}</div>
+                        <div className="font-bold text-yellow-700 text-base sm:text-lg">₹ {product.retailPrice}</div>
                       </div>
                       <div className="text-center">
                         <div className="text-xs text-slate-500">{bulkLabel}</div>
-                        <div className="font-bold text-green-700 text-lg">
+                        <div className="font-bold text-green-700 text-base sm:text-lg">
                           {bulkPrice == null ? "-" : `₹ ${bulkPrice}`}
                         </div>
                       </div>
                       {user && (
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 ml-auto sm:ml-0">
                           <Button variant="ghost" size="icon" onClick={() => startEdit(product)}>
                             <Pencil className="h-4 w-4" />
                           </Button>

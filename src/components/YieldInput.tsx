@@ -17,17 +17,17 @@ const YieldInput = ({ currentYield, baseYield, onYieldChange }: YieldInputProps)
 
   return (
     <Card className="mb-6">
-      <CardHeader className="flex flex-row items-end justify-between space-y-0">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 space-y-0">
         {/* Left Side: Title */}
-        <div className="w-1/2">
-          <CardTitle className="flex items-center text-lg">
-            <Calculator className="h-5 w-5 mr-2" />
+        <div className="w-full sm:w-1/2">
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <Calculator className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Yield Calculator
           </CardTitle>
         </div>
 
         {/* Right Side: Input */}
-        <div className="w-1/2">
+        <div className="w-full sm:w-1/2">
           <Label htmlFor="yield" className="mb-1 text-sm block">
             Desired Yield (Litres / Kgs)
           </Label>

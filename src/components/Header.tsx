@@ -15,14 +15,14 @@ const Header = () => {
 
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2 sm:space-x-4 hover:opacity-90 transition-opacity">
-            <div className="bg-white rounded-full p-2 sm:p-3 flex items-center justify-center">
+            <div className="bg-white rounded-full p-1.5 sm:p-3 flex items-center justify-center">
                 <img
                   src="/Logo.png"
                   alt="Shine & Sparkle Logo"
-                  className="h-14 w-auto sm:h-14 sm:w-auto object-contain"                />
+                  className="h-10 w-auto sm:h-14 object-contain"                />
             </div>
             <div className="flex flex-col justify-center">
               {/* <h1 className="text-lg sm:text-2xl font-bold">SHINE & SPARKLE</h1> */}
