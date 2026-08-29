@@ -4,6 +4,7 @@
 const teluguMap: Record<string, string> = {
   "acid": "యాసిడ్",
   "sles (Sodium lauryl ether snulfate)": "ఎస్ఎల్ఈఎస్",
+  "sles ": "ఎస్ఎల్ఈఎస్",
   "citric acid": "నిమ్మ ఆమ్లం",
   "salt": "ఉప్పు",
   "color": "రంగు",
