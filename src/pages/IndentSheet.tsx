@@ -294,16 +294,16 @@ const IndentSheet = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-slate-800">Indent Sheet</h1>
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800">Indent Sheet</h1>
           <div className="flex gap-4 items-center">
             <Popover open={showMonthPicker} onOpenChange={setShowMonthPicker}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-[240px] justify-start text-left font-normal",
+                    "w-full sm:w-[240px] justify-start text-left font-normal",
                     !selectedMonth && "text-muted-foreground"
                   )}
                 >
