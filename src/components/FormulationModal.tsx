@@ -65,16 +65,21 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
   const updateRow = (index: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
 
-  const moveRow = (index: number, direction: -1 | 1) => {
+  const handleDragStart = (index: number) => setDraggedIndex(index);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
     setRows((prev) => {
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= prev.length) return prev;
       const next = [...prev];
-      const [moved] = next.splice(index, 1);
-      next.splice(newIndex, 0, moved);
+      const [moved] = next.splice(draggedIndex, 1);
+      next.splice(index, 0, moved);
       return next;
     });
+    setDraggedIndex(index);
   };
+
+  const handleDragEnd = () => setDraggedIndex(null);
 
   const save = async () => {
     if (!name.trim()) return toast.error("Formulation name is required");
