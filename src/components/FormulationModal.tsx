@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Trash2, Menu } from "lucide-react";
 import { toast } from "sonner";
 import { useChemicalPrices, useUpsertRow, slugify } from "@/hooks/useCloudData";
 import type { FormulationData } from "@/data/types";
+import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
@@ -34,6 +35,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
   const [bottle5L, setBottle5L] = useState("");
   const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
   const [method, setMethod] = useState("");
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -63,16 +65,21 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
   const updateRow = (index: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
 
-  const moveRow = (index: number, direction: -1 | 1) => {
+  const handleDragStart = (index: number) => setDraggedIndex(index);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
     setRows((prev) => {
-      const newIndex = index + direction;
-      if (newIndex < 0 || newIndex >= prev.length) return prev;
       const next = [...prev];
-      const [moved] = next.splice(index, 1);
-      next.splice(newIndex, 0, moved);
+      const [moved] = next.splice(draggedIndex, 1);
+      next.splice(index, 0, moved);
       return next;
     });
+    setDraggedIndex(index);
   };
+
+  const handleDragEnd = () => setDraggedIndex(null);
 
   const save = async () => {
     if (!name.trim()) return toast.error("Formulation name is required");
@@ -159,7 +166,25 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
             </div>
             <div className="space-y-2">
               {rows.map((row, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                <div
+                  key={index}
+                  className={cn(
+                    "grid grid-cols-12 gap-2 items-center rounded-md p-1 transition-colors",
+                    draggedIndex === index ? "bg-blue-50 opacity-60" : "bg-transparent hover:bg-slate-50"
+                  )}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                >
+                  <div className="col-span-1 flex justify-center">
+                    <div
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragEnd={handleDragEnd}
+                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
+                      title="Drag to reorder"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </div>
+                  </div>
                   <div className="col-span-5">
                     <Input
                       list="chemical-options"
@@ -174,27 +199,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   <div className="col-span-2">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
                   </div>
-                  <div className="col-span-3 flex items-center justify-end gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={index === 0}
-                      onClick={() => moveRow(index, -1)}
-                    >
-                      <ArrowUp className="h-4 w-4 text-slate-600" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={index === rows.length - 1}
-                      onClick={() => moveRow(index, 1)}
-                    >
-                      <ArrowDown className="h-4 w-4 text-slate-600" />
-                    </Button>
+                  <div className="col-span-2 flex items-center justify-end">
                     <Button
                       type="button"
                       variant="ghost"
