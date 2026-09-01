@@ -166,7 +166,25 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
             </div>
             <div className="space-y-2">
               {rows.map((row, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                <div
+                  key={index}
+                  className={cn(
+                    "grid grid-cols-12 gap-2 items-center rounded-md p-1 transition-colors",
+                    draggedIndex === index ? "bg-blue-50 opacity-60" : "bg-transparent hover:bg-slate-50"
+                  )}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                >
+                  <div className="col-span-1 flex justify-center">
+                    <div
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragEnd={handleDragEnd}
+                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
+                      title="Drag to reorder"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </div>
+                  </div>
                   <div className="col-span-5">
                     <Input
                       list="chemical-options"
@@ -181,27 +199,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   <div className="col-span-2">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
                   </div>
-                  <div className="col-span-3 flex items-center justify-end gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={index === 0}
-                      onClick={() => moveRow(index, -1)}
-                    >
-                      <ArrowUp className="h-4 w-4 text-slate-600" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={index === rows.length - 1}
-                      onClick={() => moveRow(index, 1)}
-                    >
-                      <ArrowDown className="h-4 w-4 text-slate-600" />
-                    </Button>
+                  <div className="col-span-2 flex items-center justify-end">
                     <Button
                       type="button"
                       variant="ghost"
