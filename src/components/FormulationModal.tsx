@@ -160,7 +160,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
             <div className="space-y-2">
               {rows.map((row, index) => (
                 <div key={index} className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-6">
+                  <div className="col-span-5">
                     <Input
                       list="chemical-options"
                       placeholder="Chemical / Particulars"
@@ -171,14 +171,35 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   <div className="col-span-2">
                     <Input placeholder="UOM" value={row.uom} onChange={(e) => updateRow(index, { uom: e.target.value })} />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-3 flex items-center justify-end gap-1">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8"
+                      disabled={index === 0}
+                      onClick={() => moveRow(index, -1)}
+                    >
+                      <ArrowUp className="h-4 w-4 text-slate-600" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={index === rows.length - 1}
+                      onClick={() => moveRow(index, 1)}
+                    >
+                      <ArrowDown className="h-4 w-4 text-slate-600" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => setRows(rows.filter((_, i) => i !== index))}
                     >
                       <Trash2 className="h-4 w-4 text-red-600" />
