@@ -35,6 +35,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
   const [bottle5L, setBottle5L] = useState("");
   const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
   const [method, setMethod] = useState("");
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
