@@ -63,6 +63,17 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
   const updateRow = (index: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
 
+  const moveRow = (index: number, direction: -1 | 1) => {
+    setRows((prev) => {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(newIndex, 0, moved);
+      return next;
+    });
+  };
+
   const save = async () => {
     if (!name.trim()) return toast.error("Formulation name is required");
     const ingredients = rows
