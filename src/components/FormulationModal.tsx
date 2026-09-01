@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { useChemicalPrices, useUpsertRow, slugify } from "@/hooks/useCloudData";
 import type { FormulationData } from "@/data/types";
@@ -62,6 +62,17 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
 
   const updateRow = (index: number, patch: Partial<Row>) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+
+  const moveRow = (index: number, direction: -1 | 1) => {
+    setRows((prev) => {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(newIndex, 0, moved);
+      return next;
+    });
+  };
 
   const save = async () => {
     if (!name.trim()) return toast.error("Formulation name is required");
@@ -149,7 +160,7 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
             <div className="space-y-2">
               {rows.map((row, index) => (
                 <div key={index} className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-6">
+                  <div className="col-span-5">
                     <Input
                       list="chemical-options"
                       placeholder="Chemical / Particulars"
@@ -160,14 +171,35 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   <div className="col-span-2">
                     <Input placeholder="UOM" value={row.uom} onChange={(e) => updateRow(index, { uom: e.target.value })} />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-3 flex items-center justify-end gap-1">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
+                      className="h-8 w-8"
+                      disabled={index === 0}
+                      onClick={() => moveRow(index, -1)}
+                    >
+                      <ArrowUp className="h-4 w-4 text-slate-600" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={index === rows.length - 1}
+                      onClick={() => moveRow(index, 1)}
+                    >
+                      <ArrowDown className="h-4 w-4 text-slate-600" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
                       onClick={() => setRows(rows.filter((_, i) => i !== index))}
                     >
                       <Trash2 className="h-4 w-4 text-red-600" />
