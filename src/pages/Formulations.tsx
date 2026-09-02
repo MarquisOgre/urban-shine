@@ -350,14 +350,57 @@ const Formulations = () => {
               </Button>
             )}
             <Button
-              onClick={exportToPDF}
+              onClick={openPdfDialog}
               variant="outline"
               className="whitespace-nowrap"
-              title="Export all formulations to PDF"
+              title="Choose formulations to export"
             >
               Export PDF
             </Button>
           </div>
+
+          {/* PDF Export Selection Dialog */}
+          <Dialog open={pdfDialogOpen} onOpenChange={(v) => !v && setPdfDialogOpen(false)}>
+            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Select Formulations to Export</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Button variant="outline" size="sm" onClick={() => setSelectedIds(formulations.map((f) => f.id))}>
+                    Select All
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedIds([])}>
+                    Deselect All
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {formulations.map((f) => (
+                    <label
+                      key={f.id}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedIds.includes(f.id)}
+                        onCheckedChange={(checked) => {
+                          setSelectedIds((prev) =>
+                            checked
+                              ? [...prev, f.id]
+                              : prev.filter((id) => id !== f.id)
+                          );
+                        }}
+                      />
+                      <span className="text-sm text-slate-800">{f.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setPdfDialogOpen(false)}>Cancel</Button>
+                <Button onClick={exportToPDF}>Export PDF</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Title + Description Section */}
           <div className="text-center mb-8 sm:mb-12">
