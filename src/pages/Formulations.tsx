@@ -319,9 +319,17 @@ const Formulations = () => {
     return doc;
   };
 
+  const openPdfDialog = () => setPdfDialogOpen(true);
+
   const exportToPDF = async () => {
-    const doc = await buildPDF();
+    const selected = formulations.filter((f) => selectedIds.includes(f.id));
+    if (!selected.length) {
+      toast.error("Select at least one formulation");
+      return;
+    }
+    const doc = await buildPDF(selected);
     doc.save('Formulations.pdf');
+    setPdfDialogOpen(false);
   };
 
 
