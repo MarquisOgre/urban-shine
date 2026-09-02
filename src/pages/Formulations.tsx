@@ -44,14 +44,14 @@ const Formulations = () => {
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    setSelectedIds(formulations.map((f) => f.id));
-  }, [formulations]);
-
   const formulations = useMemo(
     () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
     [data]
   );
+
+  useEffect(() => {
+    setSelectedIds(formulations.map((f) => f.id));
+  }, [formulations]);
 
   const handleDelete = async (id: string) => {
     try {
