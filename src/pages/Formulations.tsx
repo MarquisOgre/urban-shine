@@ -121,7 +121,7 @@ const Formulations = () => {
       `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Sort into Big/Small pairs so summary panel never overlaps table
-    const enriched = formulations as any[];
+    const enriched = items as any[];
 
 
     const BIG_THRESHOLD = 8;
