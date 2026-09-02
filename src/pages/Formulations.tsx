@@ -41,6 +41,12 @@ const Formulations = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<FormulationData | null>(null);
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSelectedIds(formulations.map((f) => f.id));
+  }, [formulations]);
 
   const formulations = useMemo(
     () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
