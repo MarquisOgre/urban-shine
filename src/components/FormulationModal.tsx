@@ -185,21 +185,19 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   <div className="col-span-2">
                     <Input placeholder="UOM" value={row.uom} onChange={(e) => updateRow(index, { uom: e.target.value })} />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-3">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
                   </div>
-                  <div className="col-span-1 flex items-center justify-center">
+                  <div className="col-span-2 flex items-center justify-end gap-1">
                     <div
                       draggable
                       onDragStart={() => handleDragStart(index)}
                       onDragEnd={handleDragEnd}
-                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
+                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 flex items-center justify-center h-8 w-8"
                       title="Drag to reorder"
                     >
                       <Menu className="h-5 w-5" />
                     </div>
-                  </div>
-                  <div className="col-span-2 flex items-center justify-end">
                     <Button
                       type="button"
                       variant="ghost"
