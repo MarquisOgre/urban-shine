@@ -174,17 +174,6 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   )}
                   onDragOver={(e) => handleDragOver(e, index)}
                 >
-                  <div className="col-span-1 flex justify-center">
-                    <div
-                      draggable
-                      onDragStart={() => handleDragStart(index)}
-                      onDragEnd={handleDragEnd}
-                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
-                      title="Drag to reorder"
-                    >
-                      <Menu className="h-5 w-5" />
-                    </div>
-                  </div>
                   <div className="col-span-5">
                     <Input
                       list="chemical-options"
@@ -198,6 +187,17 @@ const FormulationModal = ({ open, onClose, formulation }: Props) => {
                   </div>
                   <div className="col-span-2">
                     <Input type="number" placeholder="Qty" value={row.qty} onChange={(e) => updateRow(index, { qty: e.target.value })} />
+                  </div>
+                  <div className="col-span-1 flex items-center justify-center">
+                    <div
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragEnd={handleDragEnd}
+                      className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
+                      title="Drag to reorder"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </div>
                   </div>
                   <div className="col-span-2 flex items-center justify-end">
                     <Button
