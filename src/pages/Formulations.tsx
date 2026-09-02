@@ -63,7 +63,7 @@ const Formulations = () => {
   };
 
 
-  const buildPDF = async (): Promise<jsPDF> => {
+  const buildPDF = async (items: FormulationData[]): Promise<jsPDF> => {
     const doc = new jsPDF('p', 'mm', 'a4');
     await ensureTeluguBrowserFont();
     const logoDataUrl = await loadLogoDataUrl();
