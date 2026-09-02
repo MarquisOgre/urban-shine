@@ -1,6 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { Beaker, Plus, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -37,11 +41,17 @@ const Formulations = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<FormulationData | null>(null);
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const formulations = useMemo(
     () => [...(data ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
     [data]
   );
+
+  useEffect(() => {
+    setSelectedIds(formulations.map((f) => f.id));
+  }, [formulations]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -53,7 +63,7 @@ const Formulations = () => {
   };
 
 
-  const buildPDF = async (): Promise<jsPDF> => {
+  const buildPDF = async (items: FormulationData[]): Promise<jsPDF> => {
     const doc = new jsPDF('p', 'mm', 'a4');
     await ensureTeluguBrowserFont();
     const logoDataUrl = await loadLogoDataUrl();
@@ -111,7 +121,7 @@ const Formulations = () => {
       `Rs. ${n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     // Sort into Big/Small pairs so summary panel never overlaps table
-    const enriched = formulations as any[];
+    const enriched = items as any[];
 
 
     const BIG_THRESHOLD = 8;
@@ -309,9 +319,17 @@ const Formulations = () => {
     return doc;
   };
 
+  const openPdfDialog = () => setPdfDialogOpen(true);
+
   const exportToPDF = async () => {
-    const doc = await buildPDF();
+    const selected = formulations.filter((f) => selectedIds.includes(f.id));
+    if (!selected.length) {
+      toast.error("Select at least one formulation");
+      return;
+    }
+    const doc = await buildPDF(selected);
     doc.save('Formulations.pdf');
+    setPdfDialogOpen(false);
   };
 
 
@@ -332,14 +350,57 @@ const Formulations = () => {
               </Button>
             )}
             <Button
-              onClick={exportToPDF}
+              onClick={openPdfDialog}
               variant="outline"
               className="whitespace-nowrap"
-              title="Export all formulations to PDF"
+              title="Choose formulations to export"
             >
               Export PDF
             </Button>
           </div>
+
+          {/* PDF Export Selection Dialog */}
+          <Dialog open={pdfDialogOpen} onOpenChange={(v) => !v && setPdfDialogOpen(false)}>
+            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Select Formulations to Export</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Button variant="outline" size="sm" onClick={() => setSelectedIds(formulations.map((f) => f.id))}>
+                    Select All
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedIds([])}>
+                    Deselect All
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {formulations.map((f) => (
+                    <label
+                      key={f.id}
+                      className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer"
+                    >
+                      <Checkbox
+                        checked={selectedIds.includes(f.id)}
+                        onCheckedChange={(checked) => {
+                          setSelectedIds((prev) =>
+                            checked
+                              ? [...prev, f.id]
+                              : prev.filter((id) => id !== f.id)
+                          );
+                        }}
+                      />
+                      <span className="text-sm text-slate-800">{f.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setPdfDialogOpen(false)}>Cancel</Button>
+                <Button onClick={exportToPDF}>Export PDF</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* Title + Description Section */}
           <div className="text-center mb-8 sm:mb-12">
