@@ -5,12 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Beaker, Plus, Pencil, Trash2 } from "lucide-react";
+import { Beaker, Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FormulationModal from "@/components/FormulationModal";
+import ImportFormulationModal from "@/components/ImportFormulationModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFormulations, useDeleteRow } from "@/hooks/useCloudData";
 import type { FormulationData } from "@/data/types";
@@ -42,6 +43,7 @@ const Formulations = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<FormulationData | null>(null);
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const formulations = useMemo(
@@ -413,16 +415,6 @@ const Formulations = () => {
             </DialogContent>
           </Dialog>
 
-          {/* Title + Description Section */}
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-3 sm:mb-4">
-              Professional Cleaning Formulations
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto px-4">
-              Comprehensive cleaning formulation management system
-            </p>
-          </div>
-
           {isLoading ? (
             <p className="text-center text-slate-500">Loading formulations…</p>
           ) : (
@@ -462,6 +454,8 @@ const Formulations = () => {
               ))}
             </div>
           )}
+
+          <ImportFormulationModal open={importOpen} onClose={() => setImportOpen(false)} />
 
           <FormulationModal
             open={modalOpen}
