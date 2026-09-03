@@ -14,22 +14,108 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChemicalPrices, useUpsertRow, useDeleteRow } from "@/hooks/useCloudData";
 import type { ChemicalData } from "@/data/types";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-const downloadChemicalsCSV = (chemicals: ChemicalData[]) => {
-  const header = ["Chemical", "UOM", "Rate (₹)"];
-  const rows = chemicals.map((c) => [c.chemical, c.uom, String(c.rate)]);
-  const csv = [header, ...rows]
-    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-    .join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "chemical-prices.csv";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+const loadLogoDataUrl = async (): Promise<string | null> => {
+  try {
+    const res = await fetch("/Logo.png");
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = () => resolve(null);
+      r.readAsDataURL(blob);
+    });
+  } catch { return null; }
+};
+
+const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
+  const doc = new jsPDF("p", "mm", "a4");
+  const logoDataUrl = await loadLogoDataUrl();
+  const pageW = 210;
+  const marginX = 14;
+  const INK: [number, number, number] = [30, 41, 59];
+  const ACCENT: [number, number, number] = [31, 68, 182];
+  const LINE: [number, number, number] = [200, 204, 211];
+
+  let y = 18;
+
+  if (logoDataUrl) {
+    try {
+      const props = (doc as any).getImageProperties(logoDataUrl);
+      const targetH = 18;
+      const ratio = props.width / props.height;
+      const targetW = Math.min(50, targetH * ratio);
+      const finalH = targetW / ratio;
+      doc.addImage(logoDataUrl, "PNG", pageW / 2 - targetW / 2, y - 12, targetW, finalH);
+      y += finalH + 6;
+    } catch {}
+  }
+
+  doc.setFont(undefined, "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(...ACCENT);
+  doc.text("Chemical Prices", pageW / 2, y, { align: "center" });
+  y += 8;
+
+  doc.setFont(undefined, "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...INK);
+  doc.text(`Generated on: ${new Date().toLocaleDateString("en-IN")}`, pageW / 2, y, { align: "center" });
+  y += 12;
+
+  const sorted = [...chemicals].sort((a, b) => a.chemical.localeCompare(b.chemical));
+  const body = sorted.map((c, i) => [
+    i + 1,
+    c.chemical,
+    c.uom,
+    `₹ ${c.rate.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    "",
+    "",
+  ]);
+
+  autoTable(doc, {
+    startY: y,
+    head: [["SL", "Chemical", "UOM", "Rate (₹)", "", ""]],
+    body,
+    theme: "grid",
+    styles: {
+      fontSize: 10,
+      cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
+      textColor: INK,
+      lineColor: LINE,
+      lineWidth: 0.2,
+      valign: "middle",
+      overflow: "linebreak",
+    },
+    headStyles: {
+      fillColor: ACCENT,
+      textColor: 255,
+      fontStyle: "bold",
+      halign: "center",
+    },
+    columnStyles: {
+      0: { halign: "center", cellWidth: 12 },
+      1: { cellWidth: "auto" },
+      2: { halign: "center", cellWidth: 25 },
+      3: { halign: "right", cellWidth: 28 },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 35 },
+    },
+    margin: { left: marginX, right: marginX },
+    didDrawCell: (data) => {
+      if (data.section === "head" && (data.column.index === 4 || data.column.index === 5)) {
+        const { x, y, width, height } = data.cell;
+        doc.setDrawColor(...LINE);
+        doc.setLineWidth(0.2);
+        doc.line(x + 4, y + height / 2, x + width - 4, y + height / 2);
+      }
+    },
+  });
+
+  doc.save("chemical-prices.pdf");
 };
 
 const empty = { id: "", chemical: "", rate: "", uom: "KG" };
@@ -88,7 +174,7 @@ const ChemicalPrices = () => {
             </Button>
             <h1 className="text-3xl font-bold text-slate-800">Chemical Prices</h1>
             <div className="flex flex-wrap items-center gap-2">
-              <Button variant="outline" onClick={() => downloadChemicalsCSV(chemicals)} className="gap-2">
+              <Button variant="outline" onClick={() => exportChemicalsPDF(chemicals)} className="gap-2">
                 <Download className="h-4 w-4" /> Export All Chemicals
               </Button>
               {user && (
