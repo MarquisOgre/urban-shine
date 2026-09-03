@@ -7,13 +7,30 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChemicalPrices, useUpsertRow, useDeleteRow } from "@/hooks/useCloudData";
 import type { ChemicalData } from "@/data/types";
+
+const downloadChemicalsCSV = (chemicals: ChemicalData[]) => {
+  const header = ["Chemical", "UOM", "Rate (₹)"];
+  const rows = chemicals.map((c) => [c.chemical, c.uom, String(c.rate)]);
+  const csv = [header, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "chemical-prices.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 const empty = { id: "", chemical: "", rate: "", uom: "KG" };
 
