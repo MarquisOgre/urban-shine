@@ -420,7 +420,7 @@ const Formulations = () => {
           ) : (
             <div
               id="formulations"
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8 sm:mb-10"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8 sm:mb-10"
             >
               {formulations.map((formulation) => (
                 <Card
