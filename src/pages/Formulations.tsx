@@ -5,12 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Beaker, Plus, Pencil, Trash2 } from "lucide-react";
+import { Beaker, Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FormulationModal from "@/components/FormulationModal";
+import ImportFormulationModal from "@/components/ImportFormulationModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFormulations, useDeleteRow } from "@/hooks/useCloudData";
 import type { FormulationData } from "@/data/types";
@@ -42,6 +43,7 @@ const Formulations = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<FormulationData | null>(null);
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const formulations = useMemo(
@@ -342,22 +344,33 @@ const Formulations = () => {
       
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Actions (Top Right)*/}
-          <div className="flex justify-end gap-2 mb-6 sm:mb-8">
-            {user && (
-              <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" /> Add Formulation
+          {/* Title + Actions (same row) */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800">
+              Professional Cleaning Formulations
+            </h2>
+            <div className="flex flex-wrap justify-end gap-2">
+              {user && (
+                <>
+                  <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
+                    <Plus className="h-4 w-4" /> Add Formulation
+                  </Button>
+                  <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+                    <Upload className="h-4 w-4" /> Import from ChatGPT
+                  </Button>
+                </>
+              )}
+              <Button
+                onClick={openPdfDialog}
+                variant="outline"
+                className="whitespace-nowrap"
+                title="Choose formulations to export"
+              >
+                Export PDF
               </Button>
-            )}
-            <Button
-              onClick={openPdfDialog}
-              variant="outline"
-              className="whitespace-nowrap"
-              title="Choose formulations to export"
-            >
-              Export PDF
-            </Button>
+            </div>
           </div>
+
 
           {/* PDF Export Selection Dialog */}
           <Dialog open={pdfDialogOpen} onOpenChange={(v) => !v && setPdfDialogOpen(false)}>
@@ -402,16 +415,6 @@ const Formulations = () => {
             </DialogContent>
           </Dialog>
 
-          {/* Title + Description Section */}
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 mb-3 sm:mb-4">
-              Professional Cleaning Formulations
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto px-4">
-              Comprehensive cleaning formulation management system
-            </p>
-          </div>
-
           {isLoading ? (
             <p className="text-center text-slate-500">Loading formulations…</p>
           ) : (
@@ -451,6 +454,8 @@ const Formulations = () => {
               ))}
             </div>
           )}
+
+          <ImportFormulationModal open={importOpen} onClose={() => setImportOpen(false)} />
 
           <FormulationModal
             open={modalOpen}
