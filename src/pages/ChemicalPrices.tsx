@@ -87,13 +87,16 @@ const ChemicalPrices = () => {
               Back to Dashboard
             </Button>
             <h1 className="text-3xl font-bold text-slate-800">Chemical Prices</h1>
-            {user ? (
-              <Button onClick={startAdd} className="gap-2">
-                <Plus className="h-4 w-4" /> Add Chemical
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" onClick={() => downloadChemicalsCSV(chemicals)} className="gap-2">
+                <Download className="h-4 w-4" /> Export All Chemicals
               </Button>
-            ) : (
-              <div className="w-[150px]" />
-            )}
+              {user && (
+                <Button onClick={startAdd} className="gap-2">
+                  <Plus className="h-4 w-4" /> Add Chemical
+                </Button>
+              )}
+            </div>
           </div>
 
           {isLoading ? (
