@@ -342,22 +342,33 @@ const Formulations = () => {
       
       <main className="py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Actions (Top Right)*/}
-          <div className="flex justify-end gap-2 mb-6 sm:mb-8">
-            {user && (
-              <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" /> Add Formulation
+          {/* Title + Actions (same row) */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800">
+              Professional Cleaning Formulations
+            </h2>
+            <div className="flex flex-wrap justify-end gap-2">
+              {user && (
+                <>
+                  <Button onClick={() => { setEditing(null); setModalOpen(true); }} className="gap-2">
+                    <Plus className="h-4 w-4" /> Add Formulation
+                  </Button>
+                  <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+                    <Upload className="h-4 w-4" /> Import from ChatGPT
+                  </Button>
+                </>
+              )}
+              <Button
+                onClick={openPdfDialog}
+                variant="outline"
+                className="whitespace-nowrap"
+                title="Choose formulations to export"
+              >
+                Export PDF
               </Button>
-            )}
-            <Button
-              onClick={openPdfDialog}
-              variant="outline"
-              className="whitespace-nowrap"
-              title="Choose formulations to export"
-            >
-              Export PDF
-            </Button>
+            </div>
           </div>
+
 
           {/* PDF Export Selection Dialog */}
           <Dialog open={pdfDialogOpen} onOpenChange={(v) => !v && setPdfDialogOpen(false)}>
