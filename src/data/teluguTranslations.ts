@@ -29,9 +29,31 @@ const teluguMap: Record<string, string> = {
   "balm pack": "బామ్ ప్యాక్",
   "white petroleum jelly base": "వైట్ పెట్రోలియం జెల్లీ బేస్",
   "acid thickener": "యాసిడ్ థికెనర్",
+  "pine oil": "పైన్ ఆయిల్",
+  "tro": "టీఆర్‌ఓ (టర్కీ రెడ్ ఆయిల్)",
+  "turkey red oil": "టర్కీ రెడ్ ఆయిల్",
+  "sls powder": "ఎస్ఎల్ఎస్ పౌడర్",
+  "sls": "ఎస్ఎల్ఎస్",
+  "sodium lauryl ether sulfate": "సోడియం లారిల్ ఈథర్ సల్ఫేట్",
+  "sodium carbonate": "సోడియం కార్బోనేట్",
+  "trisodium phosphate": "ట్రైసోడియం ఫాస్ఫేట్",
+  "urea": "యూరియా",
+  "water": "నీరు",
+  "soap oil": "సోప్ ఆయిల్",
+  "phenyl compound": "ఫినైల్ కాంపౌండ్",
 };
 
 export const getTelugu = (particulars: string): string | null => {
-  const key = particulars.trim().toLowerCase();
-  return teluguMap[key] ?? null;
+  const raw = particulars.trim().toLowerCase();
+  if (teluguMap[raw]) return teluguMap[raw];
+
+  // "SLES (Sodium Lauryl Ether Sulfate)" -> try "sles" then "sodium lauryl ether sulfate"
+  const base = raw.replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+/g, " ").trim();
+  if (teluguMap[base]) return teluguMap[base];
+
+  const inner = raw.match(/\(([^)]+)\)/)?.[1]?.trim();
+  if (inner && teluguMap[inner]) return teluguMap[inner];
+
+  return null;
 };
+
