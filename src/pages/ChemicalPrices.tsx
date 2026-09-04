@@ -55,16 +55,10 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
   }
 
   doc.setFont(undefined, "bold");
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setTextColor(...ACCENT);
   doc.text("Chemical Prices", pageW / 2, y, { align: "center" });
-  y += 8;
-
-  doc.setFont(undefined, "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(...INK);
-  doc.text(`Generated on: ${new Date().toLocaleDateString("en-IN")}`, pageW / 2, y, { align: "center" });
-  y += 12;
+  y += 10;
 
   const sorted = [...chemicals].sort((a, b) => a.chemical.localeCompare(b.chemical));
   const body = sorted.map((c, i) => [
@@ -76,12 +70,13 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
 
   autoTable(doc, {
     startY: y,
-    head: [["SL", "Chemical", "UOM", "Rate"]],
+    head: [["S.No", "Chemical", "UOM", "Rate"]],
     body,
     theme: "grid",
+    pageBreak: "avoid",
     styles: {
-      fontSize: 10,
-      cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
+      fontSize: 9,
+      cellPadding: { top: 2, right: 3, bottom: 2, left: 3 },
       textColor: INK,
       lineColor: LINE,
       lineWidth: 0.2,
@@ -95,10 +90,10 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
       halign: "center",
     },
     columnStyles: {
-      0: { halign: "center", cellWidth: 12 },
+      0: { halign: "center", cellWidth: 14 },
       1: { cellWidth: "auto" },
-      2: { halign: "center", cellWidth: 25 },
-      3: { halign: "right", cellWidth: 35 },
+      2: { halign: "center", cellWidth: 22 },
+      3: { halign: "right", cellWidth: 32 },
     },
     margin: { left: marginX, right: marginX },
   });
