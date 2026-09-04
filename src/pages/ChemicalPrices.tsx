@@ -35,30 +35,30 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
   const doc = new jsPDF("p", "mm", "a4");
   const logoDataUrl = await loadLogoDataUrl();
   const pageW = 210;
-  const marginX = 14;
+  const marginX = 10;
   const INK: [number, number, number] = [30, 41, 59];
   const ACCENT: [number, number, number] = [31, 68, 182];
   const LINE: [number, number, number] = [200, 204, 211];
 
-  let y = 18;
+  let y = 10;
 
   if (logoDataUrl) {
     try {
       const props = (doc as any).getImageProperties(logoDataUrl);
-      const targetH = 18;
+      const targetH = 12;
       const ratio = props.width / props.height;
-      const targetW = Math.min(50, targetH * ratio);
+      const targetW = Math.min(45, targetH * ratio);
       const finalH = targetW / ratio;
-      doc.addImage(logoDataUrl, "PNG", pageW / 2 - targetW / 2, y - 12, targetW, finalH);
-      y += finalH + 6;
+      doc.addImage(logoDataUrl, "PNG", pageW / 2 - targetW / 2, y, targetW, finalH);
+      y += finalH + 4;
     } catch {}
   }
 
   doc.setFont(undefined, "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(14);
   doc.setTextColor(...ACCENT);
   doc.text("Chemical Prices", pageW / 2, y, { align: "center" });
-  y += 10;
+  y += 6;
 
   const sorted = [...chemicals].sort((a, b) => a.chemical.localeCompare(b.chemical));
   const body = sorted.map((c, i) => [
@@ -73,10 +73,9 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
     head: [["S.No", "Chemical", "UOM", "Rate"]],
     body,
     theme: "grid",
-    pageBreak: "avoid",
     styles: {
-      fontSize: 9,
-      cellPadding: { top: 2, right: 3, bottom: 2, left: 3 },
+      fontSize: 8,
+      cellPadding: { top: 1.5, right: 2.5, bottom: 1.5, left: 2.5 },
       textColor: INK,
       lineColor: LINE,
       lineWidth: 0.2,
@@ -90,12 +89,12 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
       halign: "center",
     },
     columnStyles: {
-      0: { halign: "center", cellWidth: 14 },
+      0: { halign: "center", cellWidth: 12 },
       1: { cellWidth: "auto" },
-      2: { halign: "center", cellWidth: 22 },
-      3: { halign: "right", cellWidth: 32 },
+      2: { halign: "center", cellWidth: 20 },
+      3: { halign: "right", cellWidth: 28 },
     },
-    margin: { left: marginX, right: marginX },
+    margin: { left: marginX, right: marginX, bottom: 8 },
   });
 
   doc.save("chemical-prices.pdf");
