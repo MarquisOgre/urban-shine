@@ -208,6 +208,78 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string | null
+          order_number: string
+          payment_method: string
+          payment_screenshot_path: string | null
+          pincode: string
+          shipping: number
+          state: string
+          status: string
+          subtotal: number
+          total_amount: number
+          transaction_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          city: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number: string
+          payment_method?: string
+          payment_screenshot_path?: string | null
+          pincode: string
+          shipping?: number
+          state: string
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          order_number?: string
+          payment_method?: string
+          payment_screenshot_path?: string | null
+          pincode?: string
+          shipping?: number
+          state?: string
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          transaction_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       packing_materials: {
         Row: {
           created_at: string
@@ -268,6 +340,63 @@ export type Database = {
           retail_price?: number
           uom?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      store_products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          features: Json
+          id: string
+          images: Json
+          in_stock: boolean
+          mrp: number | null
+          name: string
+          price: number
+          slug: string
+          sort_order: number
+          tagline: string
+          uom: string
+          updated_at: string
+          usage_instructions: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          features?: Json
+          id?: string
+          images?: Json
+          in_stock?: boolean
+          mrp?: number | null
+          name: string
+          price?: number
+          slug: string
+          sort_order?: number
+          tagline?: string
+          uom?: string
+          updated_at?: string
+          usage_instructions?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          features?: Json
+          id?: string
+          images?: Json
+          in_stock?: boolean
+          mrp?: number | null
+          name?: string
+          price?: number
+          slug?: string
+          sort_order?: number
+          tagline?: string
+          uom?: string
+          updated_at?: string
+          usage_instructions?: string
         }
         Relationships: []
       }
