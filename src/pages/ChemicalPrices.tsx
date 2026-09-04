@@ -71,14 +71,12 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
     i + 1,
     c.chemical,
     c.uom,
-    `₹ ${c.rate.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-    "",
-    "",
+    `Rs. ${c.rate.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
   ]);
 
   autoTable(doc, {
     startY: y,
-    head: [["SL", "Chemical", "UOM", "Rate (₹)", "", ""]],
+    head: [["SL", "Chemical", "UOM", "Rate"]],
     body,
     theme: "grid",
     styles: {
@@ -100,19 +98,9 @@ const exportChemicalsPDF = async (chemicals: ChemicalData[]) => {
       0: { halign: "center", cellWidth: 12 },
       1: { cellWidth: "auto" },
       2: { halign: "center", cellWidth: 25 },
-      3: { halign: "right", cellWidth: 28 },
-      4: { cellWidth: 35 },
-      5: { cellWidth: 35 },
+      3: { halign: "right", cellWidth: 35 },
     },
     margin: { left: marginX, right: marginX },
-    didDrawCell: (data) => {
-      if (data.section === "head" && (data.column.index === 4 || data.column.index === 5)) {
-        const { x, y, width, height } = data.cell;
-        doc.setDrawColor(...LINE);
-        doc.setLineWidth(0.2);
-        doc.line(x + 4, y + height / 2, x + width - 4, y + height / 2);
-      }
-    },
   });
 
   doc.save("chemical-prices.pdf");
